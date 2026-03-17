@@ -1,26 +1,17 @@
-# Security Labs Portfolio
+# 🔐 cybersecurity-labs
 
-Hands-on cybersecurity lab exercises completed in isolated, controlled environments. All work is strictly educational and performed on systems I own or have explicit permission to test.
-
----
+> Praktiske sikkerhetsanalyser og lab-prosjekter
+> Aleksandar Vucenovic | Høyskolen Kristiania – IT/Cybersecurity
 
 ## Labs
 
-| # | Lab | Technique | Tools |
-|---|-----|-----------|-------|
-| 01 | [BeEF + XSS mot DVWA](./01-beef-xss/) | Reflected XSS, browser hooking | BeEF, DVWA, Kali Linux |
-| 02 | [Mimikatz — NTLM Hash Cracking](./02-mimikatz-ntlm/) | Credential dumping, offline cracking | Mimikatz, John the Ripper, Windows AD |
-| 03 | [MS17-010 EternalBlue + Network Analysis](./03-eternalblue/) | SMBv1 RCE, network forensics | Nmap, Metasploit, Wireshark |
-| 04 | [vsftpd 2.3.4 Backdoor](./04-vsftpd-backdoor/) | FTP backdoor exploitation | Nmap, Metasploit |
-
----
-
-## Ethics & Disclaimer
-
-All labs are conducted in **closed, isolated environments** (local VMs/lab networks) with no external targets. Sensitive values (IPs, session IDs, domain names, credentials) are masked in screenshots before publication. These materials are for **educational purposes only** — do not test against systems you do not own or have explicit written permission to test.
-
----
-
-## License
-
-MIT
+| Mappe | Beskrivelse | Verktøy |
+|-------|-------------|---------|
+| [soc-detection-lab](./soc-detection-lab) | Splunk BOTSv1, YARA-regler, MITRE ATT&CK | Splunk, YARA, Volatility |
+| [eternalblue-network-forensics](./eternalblue-network-forensics) | MS17-010 utnyttelse og nettverksspor | Metasploit, Wireshark |
+| [mimikatz-ntlm-lab](./mimikatz-ntlm-lab) | NTLM credential dumping | Mimikatz, Hashcat |
+| [xss-beef-dvwa](./xss-beef-dvwa) | XSS og BeEF browser exploitation | BeEF, DVWA, Burp Suite |
+| [vsftpd-backdoor-lab](./vsftpd-backdoor-lab) | vsftpd 2.3.4 bakdør | Metasploit |
+| [rfid-access-control](./rfid-access-control) | RFID-kortleser med tilgangskontroll | Arduino, MFRC522 |
+| [esp32-mqtt-iot](./esp32-mqtt-iot) | ESP32 MQTT IoT kommunikasjon | ESP32, MQTT |
+| [raspberry-pi-openvpn](./raspberry-pi-openvpn) | Selvhostet VPN-server | OpenVPN, UFW, DuckDNS |
