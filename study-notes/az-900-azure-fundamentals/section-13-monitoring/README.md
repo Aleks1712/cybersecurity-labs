@@ -46,3 +46,6 @@ az advisor recommendation list --category security -o table
 az consumption usage list \
   --query "[].{Service:consumedService, Cost:pretaxCost}" -o table
 ```
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

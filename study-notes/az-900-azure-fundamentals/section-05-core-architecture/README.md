@@ -61,3 +61,6 @@ az account show -o table
 ## Real-World Example
 
 **Maersk NotPetya (2017):** All 150 domain controllers were synced with no offline backup. When NotPetya hit, every single one was wiped simultaneously. Azure availability zones and geo-redundant storage are designed to prevent exactly this — zone-redundant services replicate across physically separate datacenters, and GRS replicates to a paired region 300+ miles away.
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

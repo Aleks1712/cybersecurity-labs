@@ -45,3 +45,28 @@ Cloud providers invest heavily in platform security, go through security audits 
 **Management of the cloud:** Autoscaling, template-based deployment, monitoring and alerting, self-healing.
 
 **Management in the cloud:** Azure Portal (web), CLI, PowerShell, Cloud Shell, REST APIs.
+
+---
+
+## Scaling Diagram
+
+```mermaid
+graph LR
+    subgraph Vertical["⬆️ Vertical Scaling"]
+        A1[2 CPU / 8 GB] -->|Scale Up| A2[8 CPU / 32 GB]
+    end
+    subgraph Horizontal["➡️ Horizontal Scaling"]
+        B1[1 VM] -->|Scale Out| B2[1 VM + 1 VM + 1 VM]
+    end
+    subgraph Elastic["🔄 Elasticity"]
+        C1[Low traffic: 1 VM] -->|Auto| C2[Peak: 5 VMs]
+        C2 -->|Auto| C3[Low again: 1 VM]
+    end
+```
+
+## Real-World Example
+
+**Maersk NotPetya (2017):** $300M in damages because their systems had no geographic distribution or cloud-based disaster recovery. Azure's built-in HA features (availability zones, region pairs, geo-redundant storage) exist specifically to prevent this kind of total infrastructure loss.
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

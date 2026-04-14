@@ -36,3 +36,40 @@ Serverless SQL auto-scales between 0.5 and 80 vCores. First 1 million executions
 | Scaling | Manual / Scale Sets | Built-in | Automatic |
 | Admin | OS + everything | App + config | Only code |
 | Cost at zero use | Still paying | Still paying | Free |
+
+---
+
+## Service Model Diagram
+
+```mermaid
+graph TB
+    subgraph SaaS["SaaS (Microsoft 365)"]
+        S1[Application ✅ Provider]
+        S2[Runtime ✅ Provider]
+        S3[OS ✅ Provider]
+        S4[Infrastructure ✅ Provider]
+    end
+    subgraph PaaS["PaaS (App Service)"]
+        P1[Application 👤 You]
+        P2[Runtime ✅ Provider]
+        P3[OS ✅ Provider]
+        P4[Infrastructure ✅ Provider]
+    end
+    subgraph IaaS["IaaS (Virtual Machines)"]
+        I1[Application 👤 You]
+        I2[Runtime 👤 You]
+        I3[OS 👤 You]
+        I4[Infrastructure ✅ Provider]
+    end
+```
+
+## Real-World Examples
+
+**IaaS:** Maersk runs 500 SAP servers on Azure VMs — full control over OS and configuration for mission-critical shipping logistics.
+
+**PaaS:** ASOS built an AI-powered virtual stylist on Azure App Service — focus on application code, Azure handles the platform.
+
+**Serverless:** Epiroc deployed a predictive maintenance AI factory on Azure Functions in 60 hours — event-driven processing from IoT sensors with zero server management.
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

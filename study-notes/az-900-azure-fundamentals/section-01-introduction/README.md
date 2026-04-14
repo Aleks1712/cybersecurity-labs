@@ -22,3 +22,6 @@ Domains 2 and 3 together make up 65-75% of the exam. Focus your study time there
 - Don't confuse Entra ID with traditional Active Directory
 - Don't confuse Pricing Calculator with TCO Calculator
 - Don't confuse Azure Policy with RBAC
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

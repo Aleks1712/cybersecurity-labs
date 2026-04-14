@@ -96,3 +96,6 @@ az security secure-score-controls list -o table
 **Maersk NotPetya (2017):** NotPetya wiped 45,000 PCs, 4,000 servers, and all 150 domain controllers. Cost: $300M. But Maersk had deployed Azure AD SSO with Password Hash Sync weeks before. With on-prem AD destroyed, employees could still sign into cloud apps through Azure AD. This is why cloud identity (Entra ID) matters — it survives when on-prem dies.
 
 **Thales 2022:** Only 51% of critical infrastructure organizations had MFA deployed. Only 30% had a formal Zero Trust strategy. Those with Zero Trust were less likely to have been breached.
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

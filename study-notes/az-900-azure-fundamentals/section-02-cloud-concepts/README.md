@@ -59,3 +59,6 @@ graph LR
 ## Real-World Example: Why This Matters
 
 **Thales Data Threat Report 2022:** 39% of critical infrastructure organizations were breached in the past 12 months, often because they did not properly address their side of the shared responsibility model. Only 28% could fully classify their data. The shared responsibility model is not just exam theory — it is the reason breaches happen.
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

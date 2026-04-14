@@ -33,3 +33,40 @@ Prevent accidental modification or deletion:
 - **ReadOnly lock:** Can only read, no modifications or deletion
 
 Applied at resource, resource group, or subscription level. Even Owner role is stopped by locks — must remove the lock first. Can restrict who can unlock using RBAC. Locks are a weak form of security (preventing accidents, not attacks).
+
+---
+
+## Cost Decision Diagram
+
+```mermaid
+graph TD
+    A[Need to estimate Azure costs?] -->|Before deploying| B[Pricing Calculator]
+    A -->|Comparing on-prem vs cloud| C[TCO Calculator]
+    A -->|Already deployed| D[Cost Management Portal]
+    D --> E[Set Budgets + Alerts]
+    D --> F[Analyze with Tags]
+    D --> G[Schedule Reports]
+    style B fill:#0078D4,color:#fff
+    style C fill:#2ECC71,color:#fff
+    style D fill:#FF9900,color:#fff
+```
+
+## CLI Examples
+
+```bash
+# Tag a resource group for cost tracking
+az group update --name ProductionRG --tags Department=Security Project=SOC
+
+# Apply a delete lock to prevent accidental deletion
+az lock create --name CriticalLock --resource-group ProductionRG \
+  --lock-type CanNotDelete
+
+# List all locks on a resource group
+az lock list --resource-group ProductionRG -o table
+```
+
+> [!TIP]
+> Pricing Calculator = "what will it cost in Azure?" · TCO Calculator = "how much do I save by migrating?"
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

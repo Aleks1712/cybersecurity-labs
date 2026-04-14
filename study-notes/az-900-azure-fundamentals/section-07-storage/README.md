@@ -83,3 +83,6 @@ az storage blob list --account-name mystorageacct \
 azcopy copy 'https://source.blob.core.windows.net/data/*' \
   'https://dest.blob.core.windows.net/backup/' --recursive
 ```
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)

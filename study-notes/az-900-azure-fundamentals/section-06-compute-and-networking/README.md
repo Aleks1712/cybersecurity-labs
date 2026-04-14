@@ -83,3 +83,6 @@ az network nsg rule create --resource-group myRG --nsg-name WebNSG \
 **Maersk:** Runs 500 SAP servers on Azure VMs with ExpressRoute for private connectivity. Classic IaaS lift-and-shift of mission-critical workloads.
 
 **Colonial Pipeline (2021):** Breached through a single VPN credential without MFA. In Azure, VPN Gateway combined with Conditional Access requiring MFA and compliant devices prevents this attack vector.
+-e 
+---
+[⬅️ Back to AZ-900 Index](../)
