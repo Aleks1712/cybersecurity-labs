@@ -2,7 +2,7 @@
 
 ![AWS](https://img.shields.io/badge/AWS-SAA--C03-FF9900?style=flat-square&logo=amazonaws)
 ![Status](https://img.shields.io/badge/Status-In_Progress-yellow?style=flat-square)
-![Sections](https://img.shields.io/badge/Sections-10-green?style=flat-square)
+![Sections](https://img.shields.io/badge/Sections-11-green?style=flat-square)
 
 Study notes for the AWS Solutions Architect Associate exam. Based on the Adrian Cantrill SAA-C03 course, AWS documentation, and hands-on experience from the AWS Community GameDay Europe 2026.
 
@@ -22,6 +22,7 @@ Study notes for the AWS Solutions Architect Associate exam. Based on the Adrian 
 | [08](section-08-databases/) | Databases | RDS, Aurora, DynamoDB, ElastiCache, Redshift |
 | [09](section-09-serverless/) | Serverless | Lambda, API Gateway, SQS, SNS, Step Functions `mermaid` |
 | [10](section-10-security/) | Security | KMS, CloudTrail, GuardDuty, WAF, Shield `cli` `gameday` |
+| [🐳](aws-containers-wiz-ctf/) | Containers with Wiz & O3C CTF | Docker layers, K8s security, CNAPP, attack paths `mermaid` `cli` |
 
 > `mermaid` = diagram · `cli` = AWS CLI code · `gameday` = from AWS Community GameDay 2026
 
