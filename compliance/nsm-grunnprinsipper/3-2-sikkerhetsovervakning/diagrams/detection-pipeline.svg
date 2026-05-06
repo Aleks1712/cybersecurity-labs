@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="ax" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#444"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="#1a1a1a">NSM 3.2 — Detection-pipeline fra event til respons</text>
+  <text x="480" y="52" text-anchor="middle" font-size="12" fill="#666">Hvert steg har et formål, og kan måles individuelt for dekning og kvalitet</text>
+
+  <!-- Stage 1: Event Sources -->
+  <g>
+    <rect x="40" y="100" width="160" height="180" rx="8" fill="#0d4f8b"/>
+    <text x="120" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">1. Event sources</text>
+    <line x1="60" y1="140" x2="180" y2="140" stroke="white" stroke-opacity="0.3"/>
+    <text x="60" y="160" font-size="10" fill="white">sshd (LogLevel VERBOSE)</text>
+    <text x="60" y="178" font-size="10" fill="white">auditd (sshd_config,</text>
+    <text x="60" y="192" font-size="10" fill="white">  authorized_keys, sudo)</text>
+    <text x="60" y="210" font-size="10" fill="white">UFW (blocked traffic)</text>
+    <text x="60" y="228" font-size="10" fill="white">fail2ban (ban events)</text>
+    <text x="60" y="246" font-size="10" fill="white">Docker (journald driver)</text>
+    <text x="60" y="264" font-size="10" fill="white">App logs (structured)</text>
+  </g>
+
+  <!-- Stage 2: Collection -->
+  <g>
+    <rect x="220" y="100" width="160" height="180" rx="8" fill="#1d6f3f"/>
+    <text x="300" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">2. Collection</text>
+    <line x1="240" y1="140" x2="360" y2="140" stroke="white" stroke-opacity="0.3"/>
+    <text x="240" y="165" font-size="10" fill="white">journald sentral</text>
+    <text x="240" y="182" font-size="10" fill="white">systemd-journal-upload</text>
+    <text x="240" y="200" font-size="10" fill="white">eller</text>
+    <text x="240" y="217" font-size="10" fill="white">vector / Promtail</text>
+    <text x="240" y="234" font-size="10" fill="white">Strukturert format (JSON)</text>
+    <text x="240" y="252" font-size="10" fill="white">Tagging per kilde</text>
+    <text x="240" y="270" font-size="10" fill="white">Buffer mot tap</text>
+  </g>
+
+  <!-- Stage 3: Detection rules -->
+  <g>
+    <rect x="400" y="100" width="160" height="180" rx="8" fill="#a85d00"/>
+    <text x="480" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">3. Detection-regler</text>
+    <line x1="420" y1="140" x2="540" y2="140" stroke="white" stroke-opacity="0.3"/>
+    <text x="420" y="165" font-size="10" fill="white">Sigma-regler</text>
+    <text x="420" y="182" font-size="10" fill="white">  (rammeverk-uavhengig)</text>
+    <text x="420" y="202" font-size="10" fill="white">SIEM-spesifikt:</text>
+    <text x="420" y="219" font-size="10" fill="white">  KQL (Sentinel)</text>
+    <text x="420" y="234" font-size="10" fill="white">  SPL (Splunk)</text>
+    <text x="420" y="249" font-size="10" fill="white">  LogQL (Loki)</text>
+    <text x="420" y="270" font-size="10" fill="white">MITRE-tagged</text>
+  </g>
+
+  <!-- Stage 4: Triage -->
+  <g>
+    <rect x="580" y="100" width="160" height="180" rx="8" fill="#8b3a8b"/>
+    <text x="660" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">4. Triage og kontekst</text>
+    <line x1="600" y1="140" x2="720" y2="140" stroke="white" stroke-opacity="0.3"/>
+    <text x="600" y="165" font-size="10" fill="white">Severity (NSM 4.2)</text>
+    <text x="600" y="182" font-size="10" fill="white">Korrelasjon flere events</text>
+    <text x="600" y="200" font-size="10" fill="white">Asset criticality</text>
+    <text x="600" y="217" font-size="10" fill="white">Threat intel enrichment</text>
+    <text x="600" y="234" font-size="10" fill="white">User context (IDP)</text>
+    <text x="600" y="252" font-size="10" fill="white">False-positive-filtering</text>
+    <text x="600" y="270" font-size="10" fill="white">Dedup over tid</text>
+  </g>
+
+  <!-- Stage 5: Response -->
+  <g>
+    <rect x="760" y="100" width="160" height="180" rx="8" fill="#7a1f1f"/>
+    <text x="840" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">5. Respons</text>
+    <line x1="780" y1="140" x2="900" y2="140" stroke="white" stroke-opacity="0.3"/>
+    <text x="780" y="165" font-size="10" fill="white">Alert til SOC/operatør</text>
+    <text x="780" y="182" font-size="10" fill="white">Automated containment:</text>
+    <text x="780" y="200" font-size="10" fill="white">  fail2ban ban</text>
+    <text x="780" y="217" font-size="10" fill="white">  Tailscale device disable</text>
+    <text x="780" y="234" font-size="10" fill="white">  Container kill</text>
+    <text x="780" y="252" font-size="10" fill="white">Escalation ladder</text>
+    <text x="780" y="270" font-size="10" fill="white">Post-incident review</text>
+  </g>
+
+  <!-- Arrows between stages -->
+  <line x1="200" y1="190" x2="218" y2="190" stroke="#444" stroke-width="2" marker-end="url(#ax)"/>
+  <line x1="380" y1="190" x2="398" y2="190" stroke="#444" stroke-width="2" marker-end="url(#ax)"/>
+  <line x1="560" y1="190" x2="578" y2="190" stroke="#444" stroke-width="2" marker-end="url(#ax)"/>
+  <line x1="740" y1="190" x2="758" y2="190" stroke="#444" stroke-width="2" marker-end="url(#ax)"/>
+
+  <!-- Below: examples and tools per stage -->
+  <text x="40" y="320" font-size="13" font-weight="600" fill="#1a1a1a">Verktøy og artefakter per fase i denne lab-en</text>
+  <line x1="40" y1="330" x2="920" y2="330" stroke="#ccc"/>
+
+  <g font-size="10" fill="#333">
+    <text x="40" y="355" font-weight="600">Stage 1:</text>
+    <text x="100" y="355">/var/log/auth.log, /var/log/audit/audit.log, journalctl -u ssh, ufw.log, fail2ban.log</text>
+
+    <text x="40" y="375" font-weight="600">Stage 2:</text>
+    <text x="100" y="375">parsers/journald-to-loki.yml, vector.toml example, Promtail config</text>
+
+    <text x="40" y="395" font-weight="600">Stage 3:</text>
+    <text x="100" y="395">sigma-rules/*.yml (5 regler), kql-queries/*.kql (Sentinel), spl-queries/*.spl (Splunk)</text>
+
+    <text x="40" y="415" font-weight="600">Stage 4:</text>
+    <text x="100" y="415">examples/triage-playbook.md, severity-matrix.md, MITRE-mapping.csv</text>
+
+    <text x="40" y="435" font-weight="600">Stage 5:</text>
+    <text x="100" y="435">examples/response-playbook.md, fail2ban-actions, manual containment-steps</text>
+  </g>
+
+  <!-- Bottom: NSM-mapping -->
+  <g transform="translate(40, 470)">
+    <rect x="0" y="0" width="880" height="50" rx="6" fill="#f0f4f8" stroke="#0d4f8b" stroke-width="1"/>
+    <text x="15" y="20" font-size="11" font-weight="600" fill="#0d4f8b">NSM-mapping:</text>
+    <text x="15" y="38" font-size="10" fill="#444">Stage 1-2 → 3.2 Etabler sikkerhetsovervåkning · Stage 3-4 → 3.3 Analyser data · Stage 5 → 4.1, 4.3 Håndtere hendelser · Lukket loop tilbake → 4.4 Evaluer og lær</text>
+  </g>
+</svg>

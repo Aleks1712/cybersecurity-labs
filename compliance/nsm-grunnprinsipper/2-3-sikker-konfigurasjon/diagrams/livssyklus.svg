@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 480" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#444"/>
+    </marker>
+  </defs>
+
+  <text x="460" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="#1a1a1a">NSM 2.3 — Livssyklus for sikker konfigurasjon</text>
+  <text x="460" y="52" text-anchor="middle" font-size="12" fill="#666">Fra anskaffelse til avvikling, med kontroller på hvert steg</text>
+
+  <!-- Phase boxes -->
+  <g>
+    <!-- 1. Definer baseline -->
+    <rect x="40" y="100" width="160" height="100" rx="8" fill="#1565a3"/>
+    <text x="120" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">1. Definer</text>
+    <text x="120" y="142" text-anchor="middle" font-size="13" font-weight="600" fill="white">baseline</text>
+    <text x="120" y="165" text-anchor="middle" font-size="10" fill="white">CIS Benchmark</text>
+    <text x="120" y="180" text-anchor="middle" font-size="10" fill="white">Mozilla guidelines</text>
+    <text x="120" y="195" text-anchor="middle" font-size="10" fill="white">Threat-model-drevet</text>
+  </g>
+
+  <g>
+    <!-- 2. Implementer -->
+    <rect x="220" y="100" width="160" height="100" rx="8" fill="#2c8852"/>
+    <text x="300" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">2. Implementer</text>
+    <text x="300" y="148" text-anchor="middle" font-size="10" fill="white">Konfig som kode</text>
+    <text x="300" y="163" text-anchor="middle" font-size="10" fill="white">Modulær (sshd_config.d/)</text>
+    <text x="300" y="178" text-anchor="middle" font-size="10" fill="white">Versjonskontrollert (git)</text>
+    <text x="300" y="193" text-anchor="middle" font-size="10" fill="white">Dokumentert rasjonale</text>
+  </g>
+
+  <g>
+    <!-- 3. Verifiser -->
+    <rect x="400" y="100" width="160" height="100" rx="8" fill="#a85d00"/>
+    <text x="480" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">3. Verifiser</text>
+    <text x="480" y="148" text-anchor="middle" font-size="10" fill="white">ssh-audit (ekstern)</text>
+    <text x="480" y="163" text-anchor="middle" font-size="10" fill="white">Lynis (lokal)</text>
+    <text x="480" y="178" text-anchor="middle" font-size="10" fill="white">sshd -t (syntaks)</text>
+    <text x="480" y="193" text-anchor="middle" font-size="10" fill="white">Funksjonstester</text>
+  </g>
+
+  <g>
+    <!-- 4. Distribuer -->
+    <rect x="580" y="100" width="160" height="100" rx="8" fill="#8b3a8b"/>
+    <text x="660" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">4. Distribuer</text>
+    <text x="660" y="148" text-anchor="middle" font-size="10" fill="white">Bash-script (homelab)</text>
+    <text x="660" y="163" text-anchor="middle" font-size="10" fill="white">Ansible (5+ hosts)</text>
+    <text x="660" y="178" text-anchor="middle" font-size="10" fill="white">Cloud-init (greenfield)</text>
+    <text x="660" y="193" text-anchor="middle" font-size="10" fill="white">Atomisk reload</text>
+  </g>
+
+  <g>
+    <!-- 5. Vedlikehold -->
+    <rect x="760" y="100" width="120" height="100" rx="8" fill="#7a1f1f"/>
+    <text x="820" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="white">5. Vedlikehold</text>
+    <text x="820" y="150" text-anchor="middle" font-size="10" fill="white">Drift detection</text>
+    <text x="820" y="165" text-anchor="middle" font-size="10" fill="white">CVE-respons</text>
+    <text x="820" y="180" text-anchor="middle" font-size="10" fill="white">Periodisk re-audit</text>
+  </g>
+
+  <!-- Arrows between phases -->
+  <line x1="200" y1="150" x2="218" y2="150" stroke="#444" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="380" y1="150" x2="398" y2="150" stroke="#444" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="560" y1="150" x2="578" y2="150" stroke="#444" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="740" y1="150" x2="758" y2="150" stroke="#444" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- Loop back -->
+  <path d="M 820 200 Q 820 280 460 280 Q 120 280 120 200" stroke="#888" stroke-width="2" fill="none" stroke-dasharray="6,4" marker-end="url(#a)"/>
+  <text x="460" y="305" text-anchor="middle" font-size="11" font-style="italic" fill="#666">Endring i trusselbilde, CVE, eller nye tiltak utløser ny iterasjon</text>
+
+  <!-- Tools and artifacts -->
+  <text x="40" y="350" font-size="13" font-weight="600" fill="#1a1a1a">Verktøy og artefakter per fase</text>
+  <line x1="40" y1="360" x2="880" y2="360" stroke="#ccc"/>
+
+  <g font-size="10" fill="#444">
+    <text x="40" y="380">Definer:</text>
+    <text x="120" y="380">CIS Benchmark v2.0.0, NIST SP 800-123, NSM 2.3-tiltak</text>
+
+    <text x="40" y="400">Implementer:</text>
+    <text x="120" y="400">/etc/ssh/sshd_config.d/, /etc/docker/daemon.json, /etc/ufw/, kommentert i git</text>
+
+    <text x="40" y="420">Verifiser:</text>
+    <text x="120" y="420">ssh-audit, Lynis, sshd -T, custom verify-script (verify-sshd-config.sh)</text>
+
+    <text x="40" y="440">Distribuer:</text>
+    <text x="120" y="440">scripts/00-bootstrap.sh (idempotent), Ansible role (planlagt), reload &gt; restart</text>
+
+    <text x="40" y="460">Vedlikehold:</text>
+    <text x="120" y="460">unattended-upgrades, auditd på konfig-filer, månedlig re-audit, CVE-feed</text>
+  </g>
+</svg>

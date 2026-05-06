@@ -1,0 +1,106 @@
+# =============================================================================
+# Vector configuration — ship journald + auditd to Loki / Splunk / Sentinel
+# =============================================================================
+# Reference deployment for vps-bootstrap → centralized log collector.
+# Vector sits on the host as a sidecar agent, reads from journald and
+# audit log, parses into structured events, and forwards.
+#
+# Install: curl --proto '=https' --tlsv1.2 -sSfL https://sh.vector.dev | bash
+# Run as systemd: /etc/systemd/system/vector.service
+#
+# Tested with vector 0.42.0 (October 2024)
+# =============================================================================
+
+[sources.journald_main]
+type = "journald"
+current_boot_only = true
+include_units = [
+    "ssh.service",
+    "sshd.service",
+    "ufw.service",
+    "fail2ban.service",
+    "docker.service"
+]
+
+[sources.audit_log]
+type = "file"
+include = ["/var/log/audit/audit.log"]
+read_from = "end"
+multiline.mode = "halt_before"
+multiline.condition_pattern = '^type='
+multiline.start_pattern = '^type='
+multiline.timeout_ms = 1000
+
+# -----------------------------------------------------------------------------
+# Transforms — extract structured fields
+# -----------------------------------------------------------------------------
+
+[transforms.parse_audit]
+type = "remap"
+inputs = ["audit_log"]
+source = '''
+# Parse auditd format into structured fields
+parsed, err = parse_grok(.message,
+    "type=%{WORD:audit_type} msg=audit\\(%{NUMBER:audit_time}:%{NUMBER:audit_id}\\): %{GREEDYDATA:audit_body}"
+)
+if err == null {
+    . = merge(., parsed)
+    .audit_key = parse_regex(.audit_body, r'key="(?P<k>[^"]+)"').k ?? ""
+    .audit_pid = parse_regex(.audit_body, r'\bpid=(?P<p>\d+)').p ?? ""
+    .audit_uid = parse_regex(.audit_body, r'\bauid=(?P<u>\d+)').u ?? ""
+    .audit_comm = parse_regex(.audit_body, r'comm="(?P<c>[^"]+)"').c ?? ""
+    .audit_path = parse_regex(.audit_body, r'name="(?P<n>[^"]+)"').n ?? ""
+}
+.host = get_hostname!()
+.source_type = "auditd"
+'''
+
+[transforms.parse_sshd]
+type = "remap"
+inputs = ["journald_main"]
+source = '''
+# Tag sshd events for downstream filtering
+if exists(.SYSLOG_IDENTIFIER) && .SYSLOG_IDENTIFIER == "sshd" {
+    .source_type = "sshd"
+    if contains(.message, "Failed password") || contains(.message, "Invalid user") {
+        .event_category = "auth_failure"
+    } else if contains(.message, "Accepted publickey") {
+        .event_category = "auth_success"
+        # Capture key fingerprint for known-key validation
+        fp = parse_regex(.message, r'(?P<fp>SHA256:\S+)').fp ?? ""
+        if fp != "" { .ssh_key_fingerprint = fp }
+    }
+}
+'''
+
+# -----------------------------------------------------------------------------
+# Sinks — forward to your collector(s)
+# -----------------------------------------------------------------------------
+
+# Loki (self-hosted)
+[sinks.loki]
+type = "loki"
+inputs = ["parse_audit", "parse_sshd"]
+endpoint = "https://loki.example.internal:3100"
+encoding.codec = "json"
+labels.host = "{{ host }}"
+labels.source_type = "{{ source_type }}"
+labels.event_category = "{{ event_category }}"
+# Auth via mesh-VPN; if going over public internet, add tls.* and auth.*
+
+# Splunk HEC (alternative)
+# [sinks.splunk_hec]
+# type = "splunk_hec_logs"
+# inputs = ["parse_audit", "parse_sshd"]
+# endpoint = "https://splunk.example.internal:8088"
+# token = "${SPLUNK_HEC_TOKEN}"
+# index = "linux"
+# sourcetype = "_json"
+
+# Azure Monitor / Sentinel (alternative)
+# [sinks.azure_monitor]
+# type = "azure_monitor_logs"
+# inputs = ["parse_audit", "parse_sshd"]
+# customer_id = "${AZURE_LOG_ANALYTICS_WORKSPACE_ID}"
+# shared_key = "${AZURE_LOG_ANALYTICS_SHARED_KEY}"
+# log_type = "VPSAudit"

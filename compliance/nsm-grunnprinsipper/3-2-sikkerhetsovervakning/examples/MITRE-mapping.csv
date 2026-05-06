@@ -1,0 +1,22 @@
+sigma_rule,mitre_tactic,mitre_technique_id,mitre_technique_name,nsm_principle,severity_default,asset_relevance,coverage_status
+ssh-brute-force.yml,Credential Access,T1110.001,Password Guessing,3.2,medium,All hosts with SSH exposed to network,Implemented
+ssh-brute-force.yml,Credential Access,T1110.003,Password Spraying,3.2,medium,All hosts with SSH exposed to network,Implemented
+sshd-config-tampering.yml,Persistence,T1098.004,SSH Authorized Keys,2.3 / 3.2,high,Any host running sshd,Implemented
+sshd-config-tampering.yml,Defense Evasion,T1556,Modify Authentication Process,2.3 / 3.2,high,Any host running sshd,Implemented
+authorized-keys-tampering.yml,Persistence,T1098.004,SSH Authorized Keys,2.6 / 3.2,high,Any host with user accounts,Implemented
+authorized-keys-tampering.yml,Lateral Movement,T1021.004,SSH,2.6 / 3.2,high,Any host with user accounts,Implemented
+docker-socket-access.yml,Privilege Escalation,T1611,Escape to Host,2.3 / 3.2,critical,Container hosts,Implemented
+docker-socket-access.yml,Execution,T1610,Deploy Container,2.3 / 3.2,critical,Container hosts,Implemented
+sudo-anomaly.yml,Privilege Escalation,T1548.003,Sudo and Sudo Caching,2.6 / 3.2,high,Linux hosts with sudo,Implemented
+sudo-anomaly.yml,Initial Access,T1078.003,Local Accounts,2.6 / 3.2,high,Linux hosts with sudo,Implemented
+NOT_YET_IMPLEMENTED,Reconnaissance,T1595.001,Scanning IP Blocks,3.1,low,Internet-facing hosts,Planned (UFW log analysis)
+NOT_YET_IMPLEMENTED,Initial Access,T1190,Exploit Public-Facing Application,3.2,critical,Web app hosts,Planned (web app firewall logs)
+NOT_YET_IMPLEMENTED,Execution,T1059.004,Unix Shell,3.2,medium,All Linux hosts,Planned (auditd execve auditing)
+NOT_YET_IMPLEMENTED,Persistence,T1543.002,Systemd Service,3.2,high,Linux hosts,Planned (systemd unit-file watcher)
+NOT_YET_IMPLEMENTED,Persistence,T1053.003,Cron,3.2,medium,Linux hosts,Planned (cron tab modification watcher)
+NOT_YET_IMPLEMENTED,Defense Evasion,T1070.002,Clear Linux or Mac System Logs,3.2,critical,All Linux hosts,Planned (auditd watch on log files)
+NOT_YET_IMPLEMENTED,Discovery,T1083,File and Directory Discovery,3.2,low,All Linux hosts,Planned (high FP risk - low priority)
+NOT_YET_IMPLEMENTED,Lateral Movement,T1021.001,Remote Desktop Protocol,3.2,medium,Windows hosts,N/A for Linux-only lab
+NOT_YET_IMPLEMENTED,Collection,T1005,Data from Local System,3.2,medium,All hosts with sensitive data,Planned (DLP-style queries)
+NOT_YET_IMPLEMENTED,Exfiltration,T1041,Exfiltration Over C2 Channel,3.2,high,Any host,Planned (egress monitoring)
+NOT_YET_IMPLEMENTED,Impact,T1496,Resource Hijacking,3.2,medium,Any host,Planned (CPU/network anomaly detection)

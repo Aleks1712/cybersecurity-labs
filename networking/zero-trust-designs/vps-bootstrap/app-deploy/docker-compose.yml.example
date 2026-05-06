@@ -1,0 +1,212 @@
+# ============================================================================
+# docker-compose.yml — Hardened template for application deployment
+# ============================================================================
+#
+# This is a template. Copy and adapt per app. The hardening defaults shown
+# here apply to virtually all stateless web apps. Adapt for stateful services
+# (databases, caches) by carefully reviewing what they need to write.
+#
+# Key principles:
+#   1. read_only: true rotfilesystem, tmpfs for legitimate writable areas
+#   2. cap_drop ALL, cap_add only what's needed
+#   3. user: non-root explicit
+#   4. ports bound to localhost or mesh interface, not 0.0.0.0
+#   5. networks defined explicitly, no use of default bridge
+#   6. resource limits to prevent runaway containers
+#   7. healthchecks so the orchestrator can detect broken state
+# ============================================================================
+
+services:
+
+  # --------------------------------------------------------------------------
+  # Reverse proxy — only this container is exposed on the mesh interface.
+  # Everything else is internal-only.
+  # --------------------------------------------------------------------------
+  caddy:
+    image: caddy:2.8-alpine
+    container_name: caddy
+    restart: unless-stopped
+
+    # Bind to mesh interface, NOT 0.0.0.0
+    # Replace 100.64.x.y with your tailscale IP (or wg0 IP)
+    ports:
+      - "100.64.x.y:80:80"
+      - "100.64.x.y:443:443"
+      - "100.64.x.y:443:443/udp"  # HTTP/3
+
+    volumes:
+      # Caddy config (read-only mount)
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # Persistent storage for ACME certs and Caddy state
+      - caddy_data:/data
+      - caddy_config:/config
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE  # required to bind to ports < 1024
+
+    networks:
+      - frontend
+
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+
+  # --------------------------------------------------------------------------
+  # Application — internal only, no public binding
+  # --------------------------------------------------------------------------
+  app:
+    image: ${APP_IMAGE:-myapp:latest}
+    container_name: app
+    restart: unless-stopped
+    # No ports: exposed externally — only reachable via the frontend network
+
+    environment:
+      - NODE_ENV=production
+      # Secrets via env file (chmod 600), or better: secrets manager
+      # Don't put secrets directly in compose file
+    env_file:
+      - .env
+
+    # Run as non-root explicitly
+    user: "1000:1000"
+
+    # Read-only root filesystem
+    read_only: true
+
+    # Writable areas as tmpfs (cleared on restart, not persisted)
+    tmpfs:
+      - /tmp:size=64M,mode=1777
+      - /run:size=8M
+
+    # If app needs persistent storage, named volume here:
+    # volumes:
+    #   - app_data:/var/lib/app
+
+    security_opt:
+      - no-new-privileges:true
+      # Optional: custom seccomp profile (default Docker profile is usually fine)
+      # - seccomp:./seccomp-profile.json
+      # AppArmor profile if available
+      # - apparmor:docker-myapp
+
+    cap_drop:
+      - ALL
+    # cap_add: only what app demonstrably needs. Most web apps need NONE.
+
+    networks:
+      - frontend
+      - backend
+
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+        reservations:
+          memory: 128M
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+  # --------------------------------------------------------------------------
+  # Database — internal only, persistent volume, restricted user
+  # --------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      # Use SCRAM-SHA-256 password hashing
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # Optional: read-only init scripts
+      # - ./db-init:/docker-entrypoint-initdb.d:ro
+
+    # Postgres needs to write to its data directory; can't be fully read-only
+    # but we can limit other things
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # Postgres needs SETUID/SETGID for its internal user dropping
+      - SETUID
+      - SETGID
+      - DAC_READ_SEARCH
+
+    networks:
+      - backend
+
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+
+# ============================================================================
+# Networks
+# ============================================================================
+# 'frontend' = caddy + app
+# 'backend'  = app + db (NO caddy — caddy must not have direct DB access)
+# This is a defense-in-depth boundary: a caddy compromise shouldn't reach DB.
+
+networks:
+  frontend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-frontend
+    # internal: false (default — needs external access for ACME)
+
+  backend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-backend
+    internal: true   # NO outbound internet for backend
+
+
+# ============================================================================
+# Volumes
+# ============================================================================
+volumes:
+  caddy_data:
+  caddy_config:
+  db_data:
+  # app_data:   # uncomment if app needs persistent state

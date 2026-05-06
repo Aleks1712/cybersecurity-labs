@@ -1,0 +1,54 @@
+title: Docker Socket Accessed
+id: d6e4f5fe-ac7f-4da4-c015-4abf90e8d765
+status: stable
+description: |
+    Detects access to /var/run/docker.sock from any non-Docker process.
+    The Docker socket is effectively root on the host — any process that can
+    write to it can spawn privileged containers, bind-mount the host filesystem,
+    and escape any container isolation. Access from outside the docker group
+    or by unexpected processes is a critical signal.
+references:
+    - https://attack.mitre.org/techniques/T1611/
+    - https://attack.mitre.org/techniques/T1610/
+    - https://docs.docker.com/engine/security/
+author: Aleks1712
+date: 2026-05-05
+modified: 2026-05-05
+tags:
+    - attack.privilege-escalation
+    - attack.t1611
+    - attack.t1610
+    - attack.defense-evasion
+    - nsm.2-3
+    - nsm.3-2
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_socket:
+        type: 'PATH'
+        name: '/var/run/docker.sock'
+        key: 'docker_socket'
+    filter_known_tools:
+        process_name:
+            - 'dockerd'
+            - 'docker'
+            - 'containerd'
+            - 'containerd-shim'
+            - 'runc'
+        # Add any legitimate orchestration tools you use:
+        # - 'k3s-agent'
+        # - 'portainer'
+    condition: selection_socket and not filter_known_tools
+falsepositives:
+    - Newly installed orchestration tool not yet on the allowlist
+    - Monitoring agent reading container info via API (e.g., cAdvisor) —
+      add to filter only if confirmed legitimate
+level: critical
+fields:
+    - audit_uid
+    - audit_user
+    - audit_pid
+    - process_name
+    - process_args
+    - timestamp

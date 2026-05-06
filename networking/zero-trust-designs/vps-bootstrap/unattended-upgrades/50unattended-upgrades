@@ -1,0 +1,52 @@
+// ============================================================================
+// /etc/apt/apt.conf.d/50unattended-upgrades
+// ============================================================================
+// Apply ONLY security updates automatically. Other updates require manual
+// review (so you don't get surprised by a major version bump in production).
+//
+// Reboots automatically at 03:00 if a kernel update requires it.
+// ============================================================================
+
+Unattended-Upgrade::Allowed-Origins {
+    "${distro_id}:${distro_codename}-security";
+    "${distro_id}ESMApps:${distro_codename}-apps-security";
+    "${distro_id}ESM:${distro_codename}-infra-security";
+};
+
+// Packages we never auto-upgrade — pin manually if you have to
+Unattended-Upgrade::Package-Blacklist {
+    // Examples: pin database server, lock kernel, etc.
+    // "linux-";
+    // "postgresql-";
+};
+
+// Email reports — uncomment and set if you have local mail configured
+// Unattended-Upgrade::Mail "root";
+// Unattended-Upgrade::MailReport "on-change";
+
+// Auto-reboot when kernel update requires it
+Unattended-Upgrade::Automatic-Reboot "true";
+Unattended-Upgrade::Automatic-Reboot-WithUsers "false";
+Unattended-Upgrade::Automatic-Reboot-Time "03:00";
+
+// Remove unused dependencies after upgrade — keeps disk clean
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+
+// Logging
+Unattended-Upgrade::Verbose "true";
+Unattended-Upgrade::Debug "false";
+
+// Don't error out if the cache is locked — try again next run
+Unattended-Upgrade::MinimalSteps "true";
+
+// Skip upgrades that require interactive input
+Dpkg::Options {
+   "--force-confdef";
+   "--force-confold";
+};
+
+// SyslogEnable — ship to journal so you can grep for upgrade events
+Unattended-Upgrade::SyslogEnable "true";
+Unattended-Upgrade::SyslogFacility "daemon";

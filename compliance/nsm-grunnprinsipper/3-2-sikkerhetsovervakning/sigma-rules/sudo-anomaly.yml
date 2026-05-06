@@ -1,0 +1,66 @@
+title: Sudo Used by Unexpected User or with Risky Command
+id: e7f5060f-bd80-4eb5-d126-5bc0a1f9e876
+status: stable
+description: |
+    Detects sudo invocations that match either of two suspicious patterns:
+    (a) sudo invoked by a user not in the operator allowlist, or (b) sudo
+    invoked with high-risk commands like adding users, modifying SSH config,
+    or shell escape sequences. The intent is to surface privilege escalation
+    attempts after an initial compromise (e.g., post-web-exploit shell that
+    pivots to root).
+references:
+    - https://attack.mitre.org/techniques/T1548/003/
+    - https://attack.mitre.org/techniques/T1078/003/
+author: Aleks1712
+date: 2026-05-05
+modified: 2026-05-05
+tags:
+    - attack.privilege-escalation
+    - attack.t1548.003
+    - attack.persistence
+    - nsm.2-6
+    - nsm.3-2
+logsource:
+    product: linux
+    service: sudo
+detection:
+    selection_sudo:
+        EventType: 'sudo'
+    selection_risky_command:
+        Command|contains:
+            - 'useradd'
+            - 'adduser'
+            - 'usermod'
+            - 'visudo'
+            - '/etc/sudoers'
+            - '/etc/ssh/'
+            - 'authorized_keys'
+            - 'iptables -F'           # firewall flush
+            - 'ufw disable'
+            - 'systemctl stop ssh'
+            - 'systemctl stop auditd'
+            - 'systemctl stop fail2ban'
+            - 'rm -rf /'              # obvious wipe attempt
+            - 'dd if='                # disk-level operations
+            - '/bin/sh'               # shell escape
+            - '/bin/bash'             # shell escape
+            - 'curl '                 # download-and-execute pattern
+            - 'wget '
+    selection_unexpected_user:
+        # Replace with your actual sudo allowlist
+        User|expand:
+            - '%operator_user%'
+            # On most homelab/VPS systems this is just 'sasha' or similar
+    condition: selection_sudo and (selection_risky_command or not selection_unexpected_user)
+falsepositives:
+    - Legitimate operator running maintenance commands — review and tune
+    - Configuration management performing scheduled changes
+    - Shell scripts running curl/wget for legitimate purposes (whitelist
+      specific scripts by parent process)
+level: high
+fields:
+    - User
+    - Command
+    - TTY
+    - SourceIp
+    - timestamp

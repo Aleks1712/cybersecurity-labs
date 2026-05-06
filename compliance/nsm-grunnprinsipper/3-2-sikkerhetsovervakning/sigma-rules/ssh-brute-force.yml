@@ -1,0 +1,44 @@
+title: Repeated SSH Authentication Failures
+id: a3f1e2d8-7b4c-4a91-9f2e-1d8c6e5b4a32
+status: stable
+description: |
+    Detects repeated SSH authentication failures from a single source within a
+    short time window. Even when password authentication is disabled (which is
+    the recommended baseline), failed pubkey attempts can indicate either
+    misconfigured legitimate clients or active reconnaissance.
+references:
+    - https://attack.mitre.org/techniques/T1110/001/
+    - https://nsm.no/regelverk-og-hjelp/rad-og-anbefalinger/oppdage/etabler-sikkerhetsovervakning/
+author: Aleks1712
+date: 2026-05-05
+modified: 2026-05-05
+tags:
+    - attack.credential-access
+    - attack.t1110.001
+    - attack.t1110.003
+    - nsm.3-2
+    - nsm.3-3
+logsource:
+    product: linux
+    service: sshd
+detection:
+    selection_failure:
+        EventType: 'authentication_failure'
+        Service: 'sshd'
+    selection_invalid_user:
+        Message|contains:
+            - 'Invalid user'
+            - 'Failed password for invalid user'
+            - 'preauth'
+    timeframe: 5m
+    condition: 1 of selection_* | count() by SourceIp > 5
+falsepositives:
+    - Misconfigured legitimate clients (typo in hostname, expired key)
+    - Backup or monitoring scripts with stale credentials
+    - Network glitches causing connection retries
+level: medium
+fields:
+    - SourceIp
+    - User
+    - Message
+    - Timestamp

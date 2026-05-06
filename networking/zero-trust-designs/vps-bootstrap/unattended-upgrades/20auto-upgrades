@@ -1,0 +1,11 @@
+// ============================================================================
+// /etc/apt/apt.conf.d/20auto-upgrades
+// ============================================================================
+// This file activates the unattended-upgrades runner. Without it, the
+// configuration in 50unattended-upgrades is just dormant.
+// ============================================================================
+
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+APT::Periodic::Verbose "1";

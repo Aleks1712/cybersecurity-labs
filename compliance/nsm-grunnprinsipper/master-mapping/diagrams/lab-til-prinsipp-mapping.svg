@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <!-- Mapping mellom labs i repoet og NSM-prinsipper -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L7,3 z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <text x="500" y="35" text-anchor="middle" font-size="20" font-weight="600" fill="#1a1a1a">Mapping: labs i repoet → NSM grunnprinsipper</text>
+  <text x="500" y="58" text-anchor="middle" font-size="12" fill="#666">Hver lab dekker flere prinsipper. Ingen lab dekker ett prinsipp fullstendig.</text>
+
+  <!-- Header for left column: Labs -->
+  <text x="180" y="100" text-anchor="middle" font-size="14" font-weight="600" fill="#1a1a1a">Labs i cybersecurity-labs</text>
+  <line x1="40" y1="110" x2="320" y2="110" stroke="#333" stroke-width="1"/>
+
+  <!-- Header for right column: Prinsipper -->
+  <text x="780" y="100" text-anchor="middle" font-size="14" font-weight="600" fill="#1a1a1a">NSM grunnprinsipper</text>
+  <line x1="650" y1="110" x2="950" y2="110" stroke="#333" stroke-width="1"/>
+
+  <!-- Labs (left side) -->
+  <g>
+    <!-- ssh-hardening -->
+    <rect x="40" y="135" width="280" height="55" rx="6" fill="#e8f0fa" stroke="#1565a3" stroke-width="1.5"/>
+    <text x="180" y="155" text-anchor="middle" font-size="12" font-weight="600" fill="#0d4f8b">ssh-hardening</text>
+    <text x="180" y="173" text-anchor="middle" font-size="10" fill="#444">Klient + server SSH config, threat model</text>
+    <text x="180" y="186" text-anchor="middle" font-size="10" fill="#444">Status: implementert og verifisert</text>
+
+    <!-- vps-bootstrap -->
+    <rect x="40" y="210" width="280" height="55" rx="6" fill="#e8f0fa" stroke="#1565a3" stroke-width="1.5"/>
+    <text x="180" y="230" text-anchor="middle" font-size="12" font-weight="600" fill="#0d4f8b">vps-bootstrap</text>
+    <text x="180" y="248" text-anchor="middle" font-size="10" fill="#444">UFW, mesh VPN, Docker, fail2ban</text>
+    <text x="180" y="261" text-anchor="middle" font-size="10" fill="#444">Status: implementert og verifisert</text>
+
+    <!-- nsm dybde labs -->
+    <rect x="40" y="285" width="280" height="55" rx="6" fill="#fff4d6" stroke="#a85d00" stroke-width="1.5"/>
+    <text x="180" y="305" text-anchor="middle" font-size="12" font-weight="600" fill="#7a4400">2-3-sikker-konfigurasjon (denne mappen)</text>
+    <text x="180" y="323" text-anchor="middle" font-size="10" fill="#444">Teori + praksis-mapping</text>
+    <text x="180" y="336" text-anchor="middle" font-size="10" fill="#444">Status: dybde-lab</text>
+
+    <rect x="40" y="360" width="280" height="55" rx="6" fill="#fff4d6" stroke="#a85d00" stroke-width="1.5"/>
+    <text x="180" y="380" text-anchor="middle" font-size="12" font-weight="600" fill="#7a4400">2-4-beskytt-nettverk (denne mappen)</text>
+    <text x="180" y="398" text-anchor="middle" font-size="10" fill="#444">Zero-trust + mesh-arkitektur</text>
+    <text x="180" y="411" text-anchor="middle" font-size="10" fill="#444">Status: dybde-lab</text>
+
+    <rect x="40" y="435" width="280" height="55" rx="6" fill="#fff4d6" stroke="#a85d00" stroke-width="1.5"/>
+    <text x="180" y="455" text-anchor="middle" font-size="12" font-weight="600" fill="#7a4400">3-2-sikkerhetsovervakning (denne mappen)</text>
+    <text x="180" y="473" text-anchor="middle" font-size="10" fill="#444">Sigma, KQL, journald-shipping</text>
+    <text x="180" y="486" text-anchor="middle" font-size="10" fill="#444">Status: dybde-lab</text>
+
+    <!-- Planlagt -->
+    <rect x="40" y="510" width="280" height="55" rx="6" fill="#f0f0f0" stroke="#888" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <text x="180" y="530" text-anchor="middle" font-size="12" font-weight="600" fill="#555">kubernetes/runtime-security (planlagt)</text>
+    <text x="180" y="548" text-anchor="middle" font-size="10" fill="#666">Falco, Tetragon, admission controllers</text>
+    <text x="180" y="561" text-anchor="middle" font-size="10" fill="#666">Status: planlagt</text>
+
+    <rect x="40" y="585" width="280" height="55" rx="6" fill="#f0f0f0" stroke="#888" stroke-width="1.5" stroke-dasharray="4,2"/>
+    <text x="180" y="605" text-anchor="middle" font-size="12" font-weight="600" fill="#555">cloud/aws-azure (planlagt)</text>
+    <text x="180" y="623" text-anchor="middle" font-size="10" fill="#666">IAM, Sentinel, GuardDuty</text>
+    <text x="180" y="636" text-anchor="middle" font-size="10" fill="#666">Status: planlagt</text>
+  </g>
+
+  <!-- Prinsipper (right side) -->
+  <g>
+    <rect x="650" y="125" width="300" height="30" rx="4" fill="#e8f5ec"/>
+    <text x="660" y="145" font-size="11" fill="#1d6f3f">2.2 Sikker IKT-arkitektur</text>
+
+    <rect x="650" y="160" width="300" height="30" rx="4" fill="#e8f5ec" stroke="#2c8852" stroke-width="2"/>
+    <text x="660" y="180" font-size="11" font-weight="600" fill="#1d6f3f">2.3 Sikker konfigurasjon</text>
+
+    <rect x="650" y="195" width="300" height="30" rx="4" fill="#e8f5ec" stroke="#2c8852" stroke-width="2"/>
+    <text x="660" y="215" font-size="11" font-weight="600" fill="#1d6f3f">2.4 Beskytt nettverk</text>
+
+    <rect x="650" y="230" width="300" height="30" rx="4" fill="#e8f5ec"/>
+    <text x="660" y="250" font-size="11" fill="#1d6f3f">2.5 Kontroller dataflyt</text>
+
+    <rect x="650" y="265" width="300" height="30" rx="4" fill="#e8f5ec"/>
+    <text x="660" y="285" font-size="11" fill="#1d6f3f">2.6 Identitet og tilgang</text>
+
+    <rect x="650" y="300" width="300" height="30" rx="4" fill="#e8f5ec"/>
+    <text x="660" y="320" font-size="11" fill="#1d6f3f">2.7 Data i ro og i transitt</text>
+
+    <rect x="650" y="335" width="300" height="30" rx="4" fill="#e8f5ec"/>
+    <text x="660" y="355" font-size="11" fill="#1d6f3f">2.10 Endringshåndtering</text>
+
+    <rect x="650" y="380" width="300" height="30" rx="4" fill="#fff0e0"/>
+    <text x="660" y="400" font-size="11" fill="#a85d00">3.1 Sårbarheter og trusler</text>
+
+    <rect x="650" y="415" width="300" height="30" rx="4" fill="#fff0e0" stroke="#c97515" stroke-width="2"/>
+    <text x="660" y="435" font-size="11" font-weight="600" fill="#a85d00">3.2 Sikkerhetsovervåkning</text>
+
+    <rect x="650" y="450" width="300" height="30" rx="4" fill="#fff0e0"/>
+    <text x="660" y="470" font-size="11" fill="#a85d00">3.3 Analyser overvåkning</text>
+
+    <rect x="650" y="495" width="300" height="30" rx="4" fill="#fce8e8"/>
+    <text x="660" y="515" font-size="11" fill="#7a1f1f">4.1 Forbered håndtering</text>
+
+    <rect x="650" y="530" width="300" height="30" rx="4" fill="#fce8e8"/>
+    <text x="660" y="550" font-size="11" fill="#7a1f1f">4.4 Evaluer og lær</text>
+  </g>
+
+  <!-- Connections (using simple lines) -->
+  <!-- ssh-hardening -> 2.3, 2.6, 2.7 -->
+  <line x1="320" y1="155" x2="650" y2="175" stroke="#1565a3" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="165" x2="650" y2="280" stroke="#1565a3" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="170" x2="650" y2="315" stroke="#1565a3" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+
+  <!-- vps-bootstrap -> 2.2, 2.3, 2.4, 2.5, 2.10, 3.1 -->
+  <line x1="320" y1="225" x2="650" y2="140" stroke="#1565a3" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="230" x2="650" y2="175" stroke="#1565a3" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <line x1="320" y1="240" x2="650" y2="210" stroke="#1565a3" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="245" x2="650" y2="245" stroke="#1565a3" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="250" x2="650" y2="350" stroke="#1565a3" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <line x1="320" y1="260" x2="650" y2="395" stroke="#1565a3" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+
+  <!-- 2-3-lab -> 2.3 -->
+  <line x1="320" y1="312" x2="650" y2="175" stroke="#a85d00" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- 2-4-lab -> 2.4 -->
+  <line x1="320" y1="387" x2="650" y2="210" stroke="#a85d00" stroke-width="2.5" marker-end="url(#arr)"/>
+
+  <!-- 3-2-lab -> 3.2, 3.3, 4.1, 4.4 -->
+  <line x1="320" y1="462" x2="650" y2="430" stroke="#a85d00" stroke-width="2.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="467" x2="650" y2="465" stroke="#a85d00" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="320" y1="472" x2="650" y2="510" stroke="#a85d00" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+  <line x1="320" y1="477" x2="650" y2="545" stroke="#a85d00" stroke-width="1" stroke-opacity="0.6" marker-end="url(#arr)"/>
+
+  <!-- planlagt -> diverse -->
+  <line x1="320" y1="537" x2="650" y2="140" stroke="#888" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+  <line x1="320" y1="612" x2="650" y2="280" stroke="#888" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arr)"/>
+
+  <!-- Legend -->
+  <g transform="translate(40, 660)">
+    <line x1="0" y1="0" x2="20" y2="0" stroke="#a85d00" stroke-width="2.5"/>
+    <text x="25" y="4" font-size="10" fill="#444">Primær mapping (lab dedikert til prinsippet)</text>
+    <line x1="280" y1="0" x2="300" y2="0" stroke="#1565a3" stroke-width="1.5"/>
+    <text x="305" y="4" font-size="10" fill="#444">Sekundær mapping (lab dekker delvis)</text>
+    <line x1="540" y1="0" x2="560" y2="0" stroke="#888" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="565" y="4" font-size="10" fill="#444">Planlagt fremtidig dekning</text>
+  </g>
+</svg>

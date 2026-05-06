@@ -1,0 +1,53 @@
+# ============================================================================
+# /etc/pam.d/sshd — Hardened PAM stack for SSH
+# ============================================================================
+#
+# This is a Debian/Ubuntu-flavored example. RHEL/SUSE differ in module names.
+# Read existing file first; only modify what's necessary.
+#
+# Key points:
+#   - We do NOT load pam_unix for password auth (PasswordAuthentication=no
+#     in sshd_config makes that moot anyway, but defense-in-depth)
+#   - Optional pam_google_authenticator for TOTP (commented out — prefer FIDO2)
+#   - pam_faillock to count and lock failed auth attempts at OS level
+# ============================================================================
+
+# -- auth -----------------------------------------------------------------
+# Only allow auth methods explicitly defined here. With pubkey-only sshd,
+# this stack is reached only after pubkey succeeds, for session setup.
+
+# Lock account after 5 failures within 15 min, unlock after 15 min
+auth    required   pam_faillock.so preauth silent deny=5 unlock_time=900 fail_interval=900
+
+# Fail-safe: if everything else fails, deny.
+auth    required   pam_deny.so
+
+# Reset failure counter on successful auth
+auth    [default=die] pam_faillock.so authfail
+auth    sufficient pam_faillock.so authsucc
+
+# Optional TOTP — uncomment if you want a second factor as well as pubkey.
+# Most use cases are better served by FIDO2 hardware keys (sk-ed25519 in
+# sshd_config) which don't require PAM changes.
+# auth    required   pam_google_authenticator.so nullok
+
+
+# -- account --------------------------------------------------------------
+account required   pam_nologin.so
+account include    common-account
+
+
+# -- session --------------------------------------------------------------
+session required   pam_loginuid.so
+session required   pam_limits.so
+session optional   pam_motd.so motd=/run/motd.dynamic
+session optional   pam_motd.so noupdate
+session optional   pam_mail.so standard noenv
+session required   pam_env.so user_readenv=0 envfile=/etc/default/locale
+session include    common-session
+session optional   pam_keyinit.so force revoke
+session optional   pam_systemd.so
+
+
+# -- password (NOT USED for SSH but defined for completeness) -------------
+password include   common-password

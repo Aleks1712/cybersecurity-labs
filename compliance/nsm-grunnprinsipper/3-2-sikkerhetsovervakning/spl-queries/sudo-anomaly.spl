@@ -1,0 +1,38 @@
+## ===========================================================================
+## Sudo Anomaly Detection — Splunk SPL
+## ===========================================================================
+## Maps to Sigma: sudo-anomaly.yml
+## Maps to MITRE: T1548.003, T1078.003
+## Maps to NSM: 2.6, 3.2
+##
+## Replace allowed_sudoers and risky_commands with values matching your env
+## ===========================================================================
+
+index=linux sourcetype=linux_secure process=sudo
+| rex field=_raw "\s(?<sudo_user>\S+)\s+:\s+TTY="
+| rex field=_raw "COMMAND=(?<sudo_command>.*)$"
+| rex field=_raw "TTY=(?<source_tty>\S+)"
+| rex field=_raw "\bRHOST=(?<source_ip>\S+)"
+| eval risky_match = if(match(sudo_command,
+    "useradd|adduser|usermod|visudo|/etc/sudoers|/etc/ssh/|authorized_keys|"
+    . "iptables -F|ufw disable|systemctl stop ssh|systemctl stop auditd|"
+    . "systemctl stop fail2ban|rm -rf /|dd if=|/bin/sh|/bin/bash|"
+    . "curl http|wget http"
+), 1, 0)
+| eval allowed_user = if(sudo_user IN ("sasha", "root"), 1, 0)
+| eval unexpected_user = if(allowed_user=0, 1, 0)
+| where risky_match=1 OR unexpected_user=1
+| eval severity = case(
+    unexpected_user=1 AND risky_match=1, "critical",
+    risky_match=1, "high",
+    unexpected_user=1, "high",
+    1=1, "medium"
+)
+| eval reason = case(
+    unexpected_user=1 AND risky_match=1, "Unexpected user running risky command",
+    risky_match=1, "Risky command (review: legitimate maintenance?)",
+    unexpected_user=1, "User not in sudo allowlist",
+    1=1, "Other"
+)
+| table _time host sudo_user sudo_command source_tty source_ip severity reason
+| sort - _time

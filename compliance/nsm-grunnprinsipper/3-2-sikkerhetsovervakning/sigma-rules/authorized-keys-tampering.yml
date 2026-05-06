@@ -1,0 +1,58 @@
+title: Authorized Keys File Modified
+id: c5f3e4ed-9b6e-4c93-bf04-3fae8f7d6c54
+status: stable
+description: |
+    Detects modification of any user's ~/.ssh/authorized_keys file. This is a
+    classic persistence technique — attackers add their own SSH key to maintain
+    access even after credentials are rotated or session is closed. Legitimate
+    additions should go through the documented change process and use scripts
+    that update authorized_keys atomically.
+references:
+    - https://attack.mitre.org/techniques/T1098/004/
+    - https://www.mandiant.com/resources/blog/persistence-techniques-attacker-ssh-keys
+author: Aleks1712
+date: 2026-05-05
+modified: 2026-05-05
+tags:
+    - attack.persistence
+    - attack.t1098.004
+    - attack.lateral-movement
+    - attack.t1021.004
+    - nsm.2-6
+    - nsm.3-2
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_authkeys:
+        type: 'PATH'
+        name|contains: 'authorized_keys'
+        key:
+            - 'authkeys_change'
+            - 'home_authkeys_change'
+            - 'root_authkeys_change'
+    selection_modification:
+        op|contains:
+            - 'wa'   # write or attribute change
+    filter_known_tools:
+        # Exclude legitimate operations from documented tooling
+        # IMPORTANT: review this list — additions to filter mean reduced detection
+        process_name|contains:
+            - 'ssh-copy-id'        # legitimate first-time key install
+            - 'ansible-modules'    # if using Ansible for key management
+        # If you don't use Ansible, remove the second entry
+    condition: all of selection_* and not filter_known_tools
+falsepositives:
+    - First-time SSH key installation via ssh-copy-id (filtered above, but
+      should still be reviewed)
+    - Configuration management tool deploying keys (filter or whitelist)
+    - User self-service key rotation through approved process
+level: high
+fields:
+    - audit_uid
+    - audit_user
+    - audit_pid
+    - process_name
+    - file_path
+    - target_user
+    - timestamp

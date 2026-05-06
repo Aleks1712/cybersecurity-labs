@@ -1,0 +1,29 @@
+// ============================================================================
+// SSHD Config Tampering — Microsoft Sentinel KQL
+// ============================================================================
+// Maps to Sigma: sshd-config-tampering.yml
+// Maps to MITRE: T1098.004 (SSH Authorized Keys), T1556 (Modify Authentication)
+// Maps to NSM: 2.3 Sikker konfigurasjon, 3.2 Sikkerhetsovervåkning
+//
+// Assumptions:
+//   - auditd watches deployed: /etc/ssh/sshd_config and sshd_config.d/
+//   - Linux Syslog connector capturing facility 'authpriv' or auditd forwarding
+//   - DCR includes auditd records (typically via syslog facility 'local6'
+//     when auditd is configured with audisp-syslog)
+// ============================================================================
+
+Syslog
+| where SyslogMessage contains "key=\"sshd_config_change\""
+        or SyslogMessage contains "key=\"sshd_hostkey_change\""
+| extend AuditUser = extract(@"auid=(\d+)", 1, SyslogMessage)
+| extend ProcessName = extract(@"comm=""([^""]+)""", 1, SyslogMessage)
+| extend ProcessPid = extract(@"pid=(\d+)", 1, SyslogMessage)
+| extend FilePath = extract(@"name=""([^""]+)""", 1, SyslogMessage)
+| extend Operation = extract(@"\bop=(\w+)", 1, SyslogMessage)
+// Filter known-legitimate change agents — adjust to your tooling
+| where ProcessName !in (
+    "ansible-config",      // remove if you don't use Ansible
+    "puppet"                // remove if you don't use Puppet
+)
+| project TimeGenerated, Computer, AuditUser, ProcessName, ProcessPid, FilePath, Operation, SyslogMessage
+| order by TimeGenerated desc

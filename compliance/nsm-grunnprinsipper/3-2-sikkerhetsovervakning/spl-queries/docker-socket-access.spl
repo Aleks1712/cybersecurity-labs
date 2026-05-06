@@ -1,0 +1,22 @@
+## ===========================================================================
+## Docker Socket Access — Splunk SPL
+## ===========================================================================
+## Maps to Sigma: docker-socket-access.yml
+## Maps to MITRE: T1611, T1610
+## Maps to NSM: 2.3, 3.2
+## ===========================================================================
+
+index=linux sourcetype=linux:audit
+    (key="docker_socket" OR _raw="*/var/run/docker.sock*")
+| rex field=_raw "auid=(?<audit_uid>\d+)"
+| rex field=_raw "\beuid=(?<euid>\d+)"
+| rex field=_raw "comm=\"(?<process_name>[^\"]+)\""
+| rex field=_raw "exe=\"(?<process_exe>[^\"]+)\""
+| rex field=_raw "\bpid=(?<process_pid>\d+)"
+| where NOT (process_name IN (
+    "dockerd", "docker", "containerd", "containerd-shim",
+    "containerd-shim-runc-v2", "runc"
+))
+| eval severity = "critical"
+| table _time host audit_uid euid process_name process_exe process_pid severity
+| sort - _time

@@ -1,0 +1,32 @@
+## ===========================================================================
+## SSH Authentication Failures — Splunk SPL
+## ===========================================================================
+## Maps to Sigma: ssh-brute-force.yml
+## Maps to MITRE: T1110.001, T1110.003
+## Maps to NSM: 3.2 Sikkerhetsovervåkning, 3.3 Analyser data
+##
+## Assumptions:
+##   - Splunk Add-on for *nix or Universal Forwarder collecting /var/log/auth.log
+##   - sourcetype=linux_secure or sourcetype=syslog with auth events
+## ===========================================================================
+
+index=linux sourcetype=linux_secure process=sshd
+    ("Failed password" OR "Invalid user" OR "preauth")
+| rex field=_raw "from\s+(?<src_ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
+| rex field=_raw "(?:Failed password for|Invalid user)\s+(?<target_user>\S+)"
+| where isnotnull(src_ip)
+| bin _time span=5m
+| stats count AS failure_count
+        dc(target_user) AS unique_users
+        values(target_user) AS users_attempted
+        min(_time) AS first_attempt
+        max(_time) AS last_attempt
+        BY src_ip host _time
+| where failure_count > 5
+| eval severity = case(
+    failure_count > 50, "high",
+    failure_count > 20, "medium",
+    1=1, "low"
+)
+| convert ctime(first_attempt) ctime(last_attempt)
+| sort - failure_count

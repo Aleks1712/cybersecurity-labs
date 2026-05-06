@@ -1,0 +1,77 @@
+# ============================================================================
+# ~/.ssh/authorized_keys — Restricted key examples
+# ============================================================================
+#
+# A naked public key on its own line gives the bearer FULL shell access from
+# ANY source IP. That's almost never what you actually want. Use options
+# prefixed to the key to restrict.
+#
+# Permissions:
+#   chmod 700 ~/.ssh
+#   chmod 600 ~/.ssh/authorized_keys
+#
+# Validate after editing:
+#   ssh-keygen -l -f ~/.ssh/authorized_keys
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+# Example 1: My personal admin key, restricted to the homelab WireGuard subnet
+# ----------------------------------------------------------------------------
+# from=     restrict source addresses (CIDR, hostnames, negation with !)
+# no-port-forwarding   even if AllowTcpForwarding=yes globally, this key cannot
+# no-agent-forwarding  defense-in-depth on top of AllowAgentForwarding=no
+# no-X11-forwarding    same
+from="10.100.0.0/24",no-port-forwarding,no-agent-forwarding,no-X11-forwarding sk-ssh-ed25519@openssh.com AAAAExampleEd25519SkPublicKey== sasha-homelab-bastion-2026-05-05
+
+
+# ----------------------------------------------------------------------------
+# Example 2: Backup automation key — locked to one command, one source
+# ----------------------------------------------------------------------------
+# command="..."   when this key authenticates, ONLY this command runs,
+#                 regardless of what the client requested. Anything the client
+#                 sent is in $SSH_ORIGINAL_COMMAND if you want to inspect it.
+# restrict        umbrella option that disables ALL forwarding, PTY allocation,
+#                 user-rc, X11. Equivalent to no-port-forwarding,
+#                 no-agent-forwarding, no-X11-forwarding, no-pty, no-user-rc
+restrict,command="/usr/local/bin/backup-receive.sh",from="10.100.0.5" ssh-ed25519 AAAAExampleEd25519PublicKey== backup-from-pbs-2026-04-01
+
+
+# ----------------------------------------------------------------------------
+# Example 3: GitHub Actions deployment key — ephemeral, tightly scoped
+# ----------------------------------------------------------------------------
+# expiry-time="..."  after this date, the key stops working. ISO 8601.
+# Useful for time-limited access (contractor, audit window, CI key with rotation).
+restrict,command="/usr/local/bin/ci-deploy.sh",from="140.82.112.0/20,143.55.64.0/20",expiry-time="20260801" ssh-ed25519 AAAAExampleCIPublicKey== github-actions-deploy-2026-q2
+
+
+# ----------------------------------------------------------------------------
+# Example 4: Emergency break-glass key — physically printed, kept offline
+# ----------------------------------------------------------------------------
+# This key sits in a safe on paper. If everything else is broken, console
+# access lets us paste this in. No restrictions because if you need this,
+# you need full access.
+# Comment with date of last rotation. Treat as a credential — rotate yearly
+# and on personnel change.
+ssh-ed25519 AAAAExampleBreakGlassKey== break-glass-printed-2026-01-15
+
+
+# ============================================================================
+# Common option reference (man sshd, AUTHORIZED_KEYS FILE FORMAT)
+# ============================================================================
+#
+# from="pattern-list"           Source IP/host restriction
+# command="cmd"                 Force this command, ignore client's
+# environment="NAME=value"      Set env var (only if PermitUserEnvironment=yes)
+# expiry-time="YYYYMMDD"        Key invalid after this date
+# no-X11-forwarding             Disable X11 over this auth
+# no-agent-forwarding           Disable agent forwarding
+# no-port-forwarding            Disable -L/-R/-D
+# no-pty                        No interactive shell allocated
+# no-user-rc                    Don't run ~/.ssh/rc
+# permitlisten="port"           Restrict -R to specific ports
+# permitopen="host:port"        Restrict -L to specific destinations
+# principals="name1,name2"      For CA-signed certs only
+# restrict                      All "no-*" above (recommended starting point)
+# tunnel="n"                    Force a specific tun device
+# verify-required               For sk-* keys, require PIN/touch

@@ -1,0 +1,136 @@
+# ============================================================================
+# ~/.ssh/config — Hardened SSH client configuration
+# Operator: Aleks1712 (Sasha)
+# Last reviewed: 2026-05-05
+# ============================================================================
+#
+# Ordering matters in this file: more specific Host blocks first,
+# then progressively more general, ending with the catch-all "Host *".
+# OpenSSH applies the FIRST match for each option, not the last.
+#
+# Test before committing: ssh -G <host> | less
+# ============================================================================
+
+
+# ----------------------------------------------------------------------------
+# Bastion / jump host for homelab
+# ----------------------------------------------------------------------------
+Host homelab-bastion
+    HostName bastion.homelab.local
+    User sasha
+    Port 22
+    IdentityFile ~/.ssh/keys/homelab_bastion_ed25519_sk
+    IdentityAgent "$SSH_AUTH_SOCK"
+    IdentitiesOnly yes
+    # Pin host key — comment out only on first connection, uncomment after verification
+    UserKnownHostsFile ~/.ssh/known_hosts.d/homelab
+    StrictHostKeyChecking yes
+    HashKnownHosts yes
+    # Connection multiplexing — opens one TCP connection, reuses for new sessions
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%C
+    ControlPersist 10m
+
+
+# ----------------------------------------------------------------------------
+# Homelab nodes — only reachable through bastion
+# ----------------------------------------------------------------------------
+Host pve-* k3s-*
+    User sasha
+    Port 22
+    IdentityFile ~/.ssh/keys/homelab_internal_ed25519_sk
+    IdentityAgent "$SSH_AUTH_SOCK"
+    IdentitiesOnly yes
+    ProxyJump homelab-bastion
+    UserKnownHostsFile ~/.ssh/known_hosts.d/homelab
+    StrictHostKeyChecking yes
+    HashKnownHosts yes
+    # No agent forwarding — bastion is the only hop, agent stays on the laptop
+    ForwardAgent no
+    ForwardX11 no
+    PermitLocalCommand no
+
+
+# ----------------------------------------------------------------------------
+# AWS EC2 instances behind a Tailscale exit node
+# ----------------------------------------------------------------------------
+Host *.aws.lab
+    User ec2-user
+    Port 22
+    IdentityFile ~/.ssh/keys/aws_lab_ed25519_sk
+    IdentityAgent "$SSH_AUTH_SOCK"
+    IdentitiesOnly yes
+    UserKnownHostsFile ~/.ssh/known_hosts.d/aws
+    StrictHostKeyChecking yes
+    HashKnownHosts yes
+    # AWS instance metadata changes on stop/start — this prevents silent surprises
+    CheckHostIP no
+    ForwardAgent no
+    ForwardX11 no
+
+
+# ----------------------------------------------------------------------------
+# Azure VMs
+# ----------------------------------------------------------------------------
+Host *.azure.lab
+    User azureuser
+    Port 22
+    IdentityFile ~/.ssh/keys/azure_lab_ed25519_sk
+    IdentityAgent "$SSH_AUTH_SOCK"
+    IdentitiesOnly yes
+    UserKnownHostsFile ~/.ssh/known_hosts.d/azure
+    StrictHostKeyChecking yes
+    HashKnownHosts yes
+    ForwardAgent no
+    ForwardX11 no
+
+
+# ----------------------------------------------------------------------------
+# GitHub portfolio agent — separate key, locked to write access on three repos
+# ----------------------------------------------------------------------------
+Host github-portfolio
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/keys/github_portfolio_ed25519
+    IdentitiesOnly yes
+    # GitHub host key pinning — verify against
+    # https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints
+    UserKnownHostsFile ~/.ssh/known_hosts.d/github
+    StrictHostKeyChecking yes
+
+
+# ----------------------------------------------------------------------------
+# Catch-all defaults — applies to anything not matched above
+# ----------------------------------------------------------------------------
+Host *
+    # Crypto: only modern, AEAD ciphers, ETM MACs, Curve25519/PQ KEX
+    KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256,curve25519-sha256@libssh.org
+    Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com
+    MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+    HostKeyAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256
+    PubkeyAcceptedAlgorithms ssh-ed25519,ssh-ed25519-cert-v01@openssh.com,sk-ssh-ed25519@openssh.com,rsa-sha2-512,rsa-sha2-256
+
+    # Defaults that should be on
+    HashKnownHosts yes
+    StrictHostKeyChecking ask
+    VerifyHostKeyDNS no
+    Protocol 2
+
+    # Defaults that should be off
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    GSSAPIAuthentication no
+    HostbasedAuthentication no
+    ForwardX11 no
+    ForwardX11Trusted no
+    PermitLocalCommand no
+
+    # Connection hygiene
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    TCPKeepAlive yes
+    Compression no
+
+    # Apple Keychain integration (macOS only — harmless on other platforms)
+    UseKeychain yes
+    AddKeysToAgent yes

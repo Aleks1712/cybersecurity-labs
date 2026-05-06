@@ -1,0 +1,35 @@
+// ============================================================================
+// Docker Socket Access — Microsoft Sentinel KQL
+// ============================================================================
+// Maps to Sigma: docker-socket-access.yml
+// Maps to MITRE: T1611 (Escape to Host), T1610 (Deploy Container)
+// Maps to NSM: 2.3 Sikker konfigurasjon, 3.2 Sikkerhetsovervåkning
+//
+// Why this query is critical:
+//   /var/run/docker.sock is effectively root on the host. Any process that
+//   can write to it can spawn a privileged container, bind-mount /, and
+//   escape any container isolation. Access from outside dockerd/containerd
+//   warrants immediate triage.
+// ============================================================================
+
+Syslog
+| where SyslogMessage contains "name=\"/var/run/docker.sock\""
+        or SyslogMessage contains "key=\"docker_socket\""
+| extend AuditUser = extract(@"auid=(\d+)", 1, SyslogMessage)
+| extend EffectiveUid = extract(@"\beuid=(\d+)", 1, SyslogMessage)
+| extend ProcessName = extract(@"comm=""([^""]+)""", 1, SyslogMessage)
+| extend ProcessExe = extract(@"exe=""([^""]+)""", 1, SyslogMessage)
+| extend ProcessPid = extract(@"\bpid=(\d+)", 1, SyslogMessage)
+// Known-legitimate Docker control plane processes
+| where ProcessName !in (
+    "dockerd",
+    "docker",
+    "containerd",
+    "containerd-shim",
+    "containerd-shim-runc-v2",
+    "runc"
+)
+// Add more allowed tools here if you use them — e.g. "k3s-agent"
+| extend Severity = "Critical"
+| project TimeGenerated, Computer, AuditUser, EffectiveUid, ProcessName, ProcessExe, ProcessPid, Severity, SyslogMessage
+| order by TimeGenerated desc

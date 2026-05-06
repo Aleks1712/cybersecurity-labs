@@ -1,0 +1,72 @@
+# =============================================================================
+# Promtail configuration — alternative to Vector for shipping logs to Loki
+# =============================================================================
+# Lighter-weight than Vector. Use this if you only need Loki and don't need
+# Vector's transformation richness.
+#
+# Install: https://grafana.com/docs/loki/latest/clients/promtail/installation/
+# Tested with promtail 3.2.0 (October 2024)
+# =============================================================================
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  - url: https://loki.example.internal:3100/loki/api/v1/push
+    # Auth via mesh-VPN. Add tls_config and basic_auth if needed.
+
+scrape_configs:
+  # ---------------------------------------------------------------------------
+  # systemd journal (sshd, ufw, fail2ban, docker)
+  # ---------------------------------------------------------------------------
+  - job_name: journal
+    journal:
+      json: false
+      max_age: 12h
+      path: /var/log/journal
+      labels:
+        job: systemd-journal
+        host: '${HOSTNAME}'
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+      - source_labels: ['__journal_syslog_identifier']
+        target_label: 'syslog_identifier'
+      - source_labels: ['__journal_priority']
+        target_label: 'priority'
+    pipeline_stages:
+      - match:
+          selector: '{syslog_identifier="sshd"}'
+          stages:
+            - regex:
+                expression: 'Failed password for (?:invalid user )?(?P<user>\S+) from (?P<src_ip>\S+)'
+            - labels:
+                event_category:
+                user:
+                src_ip:
+
+  # ---------------------------------------------------------------------------
+  # auditd log
+  # ---------------------------------------------------------------------------
+  - job_name: auditd
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: auditd
+          host: '${HOSTNAME}'
+          __path__: /var/log/audit/audit.log
+    pipeline_stages:
+      - regex:
+          expression: 'type=(?P<audit_type>\w+) msg=audit\((?P<audit_time>\d+\.\d+):(?P<audit_id>\d+)\):'
+      - regex:
+          expression: 'key="(?P<audit_key>[^"]+)"'
+      - regex:
+          expression: 'comm="(?P<process_name>[^"]+)"'
+      - labels:
+          audit_type:
+          audit_key:
+          process_name:

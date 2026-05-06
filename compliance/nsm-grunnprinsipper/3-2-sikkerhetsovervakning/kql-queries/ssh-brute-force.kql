@@ -1,0 +1,36 @@
+// ============================================================================
+// SSH Authentication Failures — Microsoft Sentinel KQL
+// ============================================================================
+// Maps to Sigma rule: ssh-brute-force.yml
+// Maps to MITRE: T1110.001 (Password Guessing), T1110.003 (Password Spraying)
+// Maps to NSM: 3.2 Sikkerhetsovervåkning, 3.3 Analyser data
+//
+// Assumptions:
+//   - Linux Syslog connector deployed via AMA (Azure Monitor Agent)
+//   - Facility 'auth' or 'authpriv' included in DCR (Data Collection Rule)
+//   - LogLevel VERBOSE in sshd_config (otherwise no fingerprint logged)
+// ============================================================================
+
+Syslog
+| where Facility in ("auth", "authpriv")
+| where ProcessName == "sshd"
+| where SyslogMessage contains "Failed" 
+        or SyslogMessage contains "Invalid user"
+        or SyslogMessage contains "preauth"
+| extend SourceIp = extract(@"from\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", 1, SyslogMessage)
+| extend TargetUser = extract(@"(?:Failed password for|Invalid user)\s+(\S+)", 1, SyslogMessage)
+| where isnotempty(SourceIp)
+| summarize FailureCount = count(),
+            FirstAttempt = min(TimeGenerated),
+            LastAttempt = max(TimeGenerated),
+            UniqueUsers = dcount(TargetUser),
+            UsersAttempted = make_set(TargetUser, 20)
+        by SourceIp, Computer, bin(TimeGenerated, 5m)
+| where FailureCount > 5
+| extend Severity = case(
+    FailureCount > 50, "High",
+    FailureCount > 20, "Medium",
+    "Low"
+)
+| project TimeGenerated, Computer, SourceIp, FailureCount, UniqueUsers, UsersAttempted, FirstAttempt, LastAttempt, Severity
+| order by FailureCount desc

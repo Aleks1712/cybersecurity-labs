@@ -1,0 +1,82 @@
+# ============================================================================
+# /etc/fail2ban/jail.local — Hardened fail2ban configuration
+# ============================================================================
+#
+# Reminder: when SSH is publickey-only and bound to a mesh interface,
+# fail2ban-against-SSH is hygiene, not primary defense. The real defense
+# is that there's nothing for an attacker to brute-force.
+#
+# This file is here so that:
+#   1. If you accidentally expose SSH publicly, fail2ban catches the worst noise
+#   2. If you later expose other services (HTTP basic auth, etc.), the same
+#      framework is ready
+#   3. You have the audit trail of who tried what
+# ============================================================================
+
+[DEFAULT]
+# Time bans last (10 minutes is enough — repeat offenders earn longer bans
+# via 'bantime.increment')
+bantime  = 10m
+findtime = 10m
+maxretry = 3
+
+# Increment bantime for repeat offenders
+# 1st offense: 10m, 2nd: 20m, 3rd: 40m, etc., up to 1 week
+bantime.increment = true
+bantime.factor    = 2
+bantime.maxtime   = 1w
+
+# Use nftables backend on modern Ubuntu/Debian (iptables-multiport is legacy)
+banaction      = nftables-multiport
+banaction_allports = nftables-allports
+
+# Don't do reverse-DNS lookups on banned IPs (slow, leaks DNS queries)
+usedns = no
+
+# Whitelist mesh networks — never ban a mesh IP
+ignoreip = 127.0.0.0/8 ::1 100.64.0.0/10 10.0.0.0/8 192.168.0.0/16
+
+# Ship ban events to systemd journal so they're visible alongside other logs
+logtarget = SYSLOG
+
+
+[sshd]
+# Active even though SSH is mesh-bound — defense in depth, plus catches the
+# "oops I left SSH open by accident" scenario
+enabled  = true
+port     = ssh
+# Use journald source on systemd hosts (Ubuntu 24.04 default)
+backend  = systemd
+filter   = sshd
+maxretry = 3
+findtime = 10m
+bantime  = 1h
+
+
+[recidive]
+# Long-term ban for IPs that keep coming back across multiple jails
+# This is the jail that actually does work — most legitimate-mistake bans
+# clear in 10 min, persistent attackers get permanently locked out
+enabled  = true
+filter   = recidive
+logpath  = /var/log/fail2ban.log
+banaction = nftables-allports
+bantime  = 1w
+findtime = 1d
+maxretry = 5
+
+
+# ============================================================================
+# Notes on jails NOT enabled
+# ============================================================================
+#
+# nginx-http-auth, apache-auth, etc.:
+#   Enable per-host when you actually run a web server. Don't enable
+#   speculatively — empty log files cause noise in fail2ban startup.
+#
+# postfix, dovecot:
+#   Enable on mail servers. Out of scope for this bootstrap.
+#
+# wordpress:
+#   If you're running WordPress on a generic VPS in 2026, that's a separate
+#   conversation about whether you should be.

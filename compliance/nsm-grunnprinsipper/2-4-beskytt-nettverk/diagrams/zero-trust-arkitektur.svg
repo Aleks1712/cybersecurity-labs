@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 580" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#444"/>
+    </marker>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6">
+      <line x1="0" y1="0" x2="6" y2="6" stroke="#a52a2a" stroke-width="0.8" stroke-opacity="0.3"/>
+    </pattern>
+  </defs>
+
+  <text x="460" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="#1a1a1a">NSM 2.4 — Lagdelt nettverksbeskyttelse</text>
+  <text x="460" y="52" text-anchor="middle" font-size="12" fill="#666">Fra perimeter-modell til zero-trust mesh, med eksplisitte trust-grenser</text>
+
+  <!-- Outer: Public internet (untrusted) -->
+  <rect x="40" y="80" width="840" height="480" rx="12" fill="url(#hatch)" stroke="#a52a2a" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="60" y="105" font-size="13" font-weight="600" fill="#7a1f1f">Public Internet — utrusted</text>
+  <text x="60" y="122" font-size="10" fill="#7a1f1f">B1 mass scanners, B2 cryptojackers, B5 web exploits, opportunistic actors</text>
+
+  <!-- Mesh boundary -->
+  <rect x="100" y="160" width="720" height="370" rx="10" fill="#fff" stroke="#1565a3" stroke-width="2"/>
+  <text x="120" y="185" font-size="13" font-weight="600" fill="#0d4f8b">VPN Mesh Network — authenticated peers only</text>
+  <text x="120" y="202" font-size="10" fill="#444">Tailscale eller WireGuard. Identitets-basert tillit, ikke IP-basert.</text>
+
+  <!-- Host boundary -->
+  <rect x="160" y="230" width="600" height="280" rx="8" fill="#f8fafc" stroke="#2c8852" stroke-width="2"/>
+  <text x="180" y="255" font-size="12" font-weight="600" fill="#1d6f3f">VPS Host — UFW deny-by-default, mesh interface allow only</text>
+
+  <!-- Container boundary 1 (frontend) -->
+  <rect x="200" y="280" width="240" height="180" rx="6" fill="#fff8e8" stroke="#a85d00" stroke-width="1.5"/>
+  <text x="220" y="305" font-size="11" font-weight="600" fill="#7a4400">Frontend network</text>
+  <text x="220" y="320" font-size="9" fill="#666">caddy reverse proxy</text>
+  <text x="220" y="333" font-size="9" fill="#666">read_only, cap_drop ALL</text>
+
+  <!-- Caddy container -->
+  <rect x="220" y="350" width="180" height="90" rx="4" fill="#ffe9b3"/>
+  <text x="310" y="372" text-anchor="middle" font-size="11" font-weight="600" fill="#7a4400">caddy</text>
+  <text x="310" y="390" text-anchor="middle" font-size="9" fill="#444">100.64.x.y:80,443</text>
+  <text x="310" y="403" text-anchor="middle" font-size="9" fill="#444">cap: NET_BIND_SERVICE</text>
+  <text x="310" y="416" text-anchor="middle" font-size="9" fill="#444">no-new-privileges</text>
+  <text x="310" y="429" text-anchor="middle" font-size="9" fill="#444">memory: 256M</text>
+
+  <!-- Backend network (internal: true) -->
+  <rect x="480" y="280" width="260" height="180" rx="6" fill="#e8f5ec" stroke="#1d6f3f" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="500" y="305" font-size="11" font-weight="600" fill="#1d6f3f">Backend network (internal:true)</text>
+  <text x="500" y="320" font-size="9" fill="#666">NO outbound internet — segmentert</text>
+  <text x="500" y="333" font-size="9" fill="#666">caddy kan ikke nå denne sonen</text>
+
+  <!-- App container -->
+  <rect x="495" y="345" width="110" height="100" rx="4" fill="#c8e6c9"/>
+  <text x="550" y="365" text-anchor="middle" font-size="11" font-weight="600" fill="#1d6f3f">app</text>
+  <text x="550" y="380" text-anchor="middle" font-size="9" fill="#444">non-root</text>
+  <text x="550" y="393" text-anchor="middle" font-size="9" fill="#444">read_only</text>
+  <text x="550" y="406" text-anchor="middle" font-size="9" fill="#444">tmpfs /tmp</text>
+  <text x="550" y="419" text-anchor="middle" font-size="9" fill="#444">cap_drop ALL</text>
+  <text x="550" y="432" text-anchor="middle" font-size="9" fill="#444">memory: 512M</text>
+
+  <!-- DB container -->
+  <rect x="615" y="345" width="110" height="100" rx="4" fill="#c8e6c9"/>
+  <text x="670" y="365" text-anchor="middle" font-size="11" font-weight="600" fill="#1d6f3f">db (postgres)</text>
+  <text x="670" y="380" text-anchor="middle" font-size="9" fill="#444">non-root</text>
+  <text x="670" y="393" text-anchor="middle" font-size="9" fill="#444">persistent vol</text>
+  <text x="670" y="406" text-anchor="middle" font-size="9" fill="#444">cap: SETUID,</text>
+  <text x="670" y="419" text-anchor="middle" font-size="9" fill="#444">SETGID, DAC_*</text>
+  <text x="670" y="432" text-anchor="middle" font-size="9" fill="#444">memory: 1G</text>
+
+  <!-- App to DB connection -->
+  <line x1="605" y1="395" x2="615" y2="395" stroke="#1d6f3f" stroke-width="2" marker-end="url(#ar)"/>
+
+  <!-- Caddy to App connection (over backend network bridge) -->
+  <path d="M 400 395 Q 440 395 440 395 Q 480 395 495 395" stroke="#a85d00" stroke-width="2" fill="none" marker-end="url(#ar)"/>
+
+  <!-- Mesh to Caddy ingress (only allowed path from outside) -->
+  <line x1="120" y1="395" x2="218" y2="395" stroke="#0d4f8b" stroke-width="2.5" marker-end="url(#ar)"/>
+  <text x="170" y="385" text-anchor="middle" font-size="9" fill="#0d4f8b">mesh-bound</text>
+
+  <!-- Blocked path indicator -->
+  <line x1="60" y1="395" x2="98" y2="395" stroke="#a52a2a" stroke-width="2" stroke-dasharray="3,2"/>
+  <line x1="80" y1="385" x2="92" y2="405" stroke="#a52a2a" stroke-width="2"/>
+  <line x1="92" y1="385" x2="80" y2="405" stroke="#a52a2a" stroke-width="2"/>
+  <text x="60" y="380" font-size="9" fill="#7a1f1f">Public</text>
+  <text x="60" y="392" font-size="9" fill="#7a1f1f">connect</text>
+  <text x="60" y="404" font-size="9" fill="#7a1f1f">attempts</text>
+  <text x="60" y="416" font-size="9" fill="#7a1f1f">blocked</text>
+
+  <!-- Trust boundary labels -->
+  <text x="520" y="488" text-anchor="middle" font-size="11" font-style="italic" fill="#1565a3">→ Hver grense krever uavhengig kompromiss av angriperen</text>
+
+  <!-- Labels for boundaries on right -->
+  <g transform="translate(460, 540)">
+    <text x="0" y="0" font-size="11" font-weight="600" fill="#1a1a1a">Trust-grenser (4 totalt):</text>
+    <text x="0" y="18" font-size="10" fill="#444">1. Public → Mesh (autentisering)</text>
+    <text x="0" y="32" font-size="10" fill="#444">2. Mesh → Host (UFW)</text>
+    <text x="0" y="46" font-size="10" fill="#444">3. Host → Container (Docker security_opt)</text>
+    <text x="0" y="60" font-size="10" fill="#444">4. Frontend → Backend (network isolation)</text>
+  </g>
+</svg>

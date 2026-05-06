@@ -1,0 +1,53 @@
+title: SSH Server Configuration File Modified
+id: b4e2f3c9-8a5d-4b82-aef3-2e9d7f6c5b43
+status: stable
+description: |
+    Detects modification of SSH server configuration files via auditd watches.
+    Changes to sshd_config or sshd_config.d/ outside of an authorized change
+    process indicate either a misconfiguration risk or active tampering.
+    This rule depends on auditd watch rules being deployed (see vps-bootstrap
+    bootstrap script).
+references:
+    - https://attack.mitre.org/techniques/T1098/004/
+    - https://attack.mitre.org/techniques/T1556/
+author: Aleks1712
+date: 2026-05-05
+modified: 2026-05-05
+tags:
+    - attack.persistence
+    - attack.t1098.004
+    - attack.t1556
+    - attack.defense-evasion
+    - nsm.2-3
+    - nsm.3-2
+logsource:
+    product: linux
+    service: auditd
+detection:
+    selection_audit_key:
+        type: 'PATH'
+        key:
+            - 'sshd_config_change'
+            - 'sshd_hostkey_change'
+    selection_action:
+        nametype:
+            - 'NORMAL'
+            - 'CREATE'
+            - 'DELETE'
+        op:
+            - 'wa'
+    condition: all of selection_*
+falsepositives:
+    - Authorized configuration management tool (Ansible, Salt, Puppet)
+    - Operator performing scheduled hardening update with proper change record
+    - Package upgrade (apt) replacing config files — should be limited via
+      Dpkg::Options "--force-confold"
+level: high
+fields:
+    - audit_uid
+    - audit_user
+    - audit_pid
+    - process_name
+    - file_path
+    - file_path_pre
+    - timestamp

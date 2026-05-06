@@ -1,0 +1,35 @@
+# ============================================================================
+# /etc/ssh/sshd_config — Hardened baseline
+# Operator: Aleks1712
+# Last reviewed: 2026-05-05
+# ============================================================================
+#
+# This file is intentionally minimal. All policy is in /etc/ssh/sshd_config.d/
+# so that:
+#   1. Distribution package upgrades don't silently overwrite policy
+#   2. Configuration management (Ansible, etc.) can drop in files atomically
+#   3. Each concern is isolated and easy to reason about in isolation
+#
+# Validate before reload: sshd -t -f /etc/ssh/sshd_config
+# Reload:                 systemctl reload ssh
+# ============================================================================
+
+# Listen only on the interfaces we control. Override per-host as needed.
+# For homelab: bind to WireGuard interface only
+# For cloud:   bind to private VPC interface only, expose via VPN/bastion
+# Set this in /etc/ssh/sshd_config.d/00-listen.conf per host
+Port 22
+
+# Pull in modular policy
+Include /etc/ssh/sshd_config.d/*.conf
+
+# Use the system-wide moduli file for DH (still relevant for some KEX fallbacks).
+# Regenerate with: ssh-keygen -M generate -O bits=4096 moduli-2048.candidates &&
+#                  ssh-keygen -M screen -f moduli-2048.candidates moduli-2048
+# This takes hours — plan accordingly. Done once, kept for years.
+
+# Subsystems
+Subsystem sftp /usr/lib/openssh/sftp-server -f AUTHPRIV -l INFO
+
+# Banner — legal warning. Required for some compliance frameworks (NIST AC-8).
+Banner /etc/ssh/banner

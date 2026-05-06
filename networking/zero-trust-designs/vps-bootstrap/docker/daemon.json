@@ -1,0 +1,22 @@
+{
+  "iptables": false,
+  "ip-forward": false,
+  "userns-remap": "default",
+  "no-new-privileges": true,
+  "log-driver": "journald",
+  "log-opts": {
+    "tag": "{{.Name}}/{{.ID}}"
+  },
+  "storage-driver": "overlay2",
+  "live-restore": true,
+  "default-runtime": "runc",
+  "default-ulimits": {
+    "nofile": {
+      "Name": "nofile",
+      "Hard": 65536,
+      "Soft": 65536
+    }
+  },
+  "experimental": false,
+  "metrics-addr": "127.0.0.1:9323"
+}

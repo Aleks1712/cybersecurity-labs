@@ -1,0 +1,45 @@
+// ============================================================================
+// Sudo Anomaly Detection — Microsoft Sentinel KQL
+// ============================================================================
+// Maps to Sigma: sudo-anomaly.yml
+// Maps to MITRE: T1548.003 (Sudo and Sudo Caching), T1078.003 (Local Accounts)
+// Maps to NSM: 2.6 Identitet og tilgang, 3.2 Sikkerhetsovervåkning
+// ============================================================================
+
+let RiskyCommands = dynamic([
+    "useradd", "adduser", "usermod", "visudo",
+    "/etc/sudoers", "/etc/ssh/", "authorized_keys",
+    "iptables -F", "ufw disable",
+    "systemctl stop ssh", "systemctl stop auditd", "systemctl stop fail2ban",
+    "rm -rf /", "dd if=",
+    "/bin/sh", "/bin/bash",   // shell escape
+    "curl http", "wget http"   // download-and-execute
+]);
+//
+// Replace with your actual sudo allowlist. On a small VPS this is typically
+// just one or two operator users.
+let AllowedSudoers = dynamic(["sasha", "root"]);
+
+Syslog
+| where ProcessName == "sudo" or SyslogMessage contains "COMMAND="
+| extend SudoUser = extract(@"\s(\S+)\s+:\s+TTY=", 1, SyslogMessage)
+| extend SudoCommand = extract(@"COMMAND=(.*)$", 1, SyslogMessage)
+| extend SourceTty = extract(@"TTY=(\S+)", 1, SyslogMessage)
+| extend SourceIp = extract(@"\bRHOST=(\S+)", 1, SyslogMessage)
+| extend RiskyMatch = iff(SudoCommand has_any (RiskyCommands), true, false)
+| extend UnexpectedUser = iff(SudoUser !in (AllowedSudoers), true, false)
+| where RiskyMatch == true or UnexpectedUser == true
+| extend Severity = case(
+    UnexpectedUser and RiskyMatch, "Critical",
+    RiskyMatch, "High",
+    UnexpectedUser, "High",
+    "Medium"
+)
+| extend Reason = case(
+    UnexpectedUser and RiskyMatch, "Unexpected user running risky command",
+    RiskyMatch, "Risky command (review: legitimate maintenance?)",
+    UnexpectedUser, "User not in sudo allowlist",
+    "Other"
+)
+| project TimeGenerated, Computer, SudoUser, SudoCommand, SourceTty, SourceIp, Severity, Reason
+| order by TimeGenerated desc

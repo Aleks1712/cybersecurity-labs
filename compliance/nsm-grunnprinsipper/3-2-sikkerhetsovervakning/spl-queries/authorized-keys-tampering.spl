@@ -1,0 +1,22 @@
+## ===========================================================================
+## Authorized Keys Tampering — Splunk SPL
+## ===========================================================================
+## Maps to Sigma: authorized-keys-tampering.yml
+## Maps to MITRE: T1098.004, T1021.004
+## Maps to NSM: 2.6, 3.2
+## ===========================================================================
+
+index=linux sourcetype=linux:audit
+    (key="authkeys_change" OR _raw="*authorized_keys*")
+| rex field=_raw "auid=(?<audit_uid>\d+)"
+| rex field=_raw "comm=\"(?<process_name>[^\"]+)\""
+| rex field=_raw "name=\"(?<file_path>[^\"]+)\""
+| rex field=file_path "/home/(?<target_user>\w+)/\.ssh/"
+| where NOT (process_name IN ("ssh-copy-id", "sshd"))
+| eval severity = case(
+    match(file_path, "/root/\.ssh/"), "critical",
+    isnotnull(target_user), "high",
+    1=1, "medium"
+)
+| table _time host audit_uid process_name file_path target_user severity
+| sort - _time

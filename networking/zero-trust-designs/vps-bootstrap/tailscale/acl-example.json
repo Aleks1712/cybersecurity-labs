@@ -1,0 +1,45 @@
+// Tailscale ACL — minimal "least privilege" example
+// Paste this into the Tailscale admin console ACL editor and adapt.
+// Removes default "all-to-all" policy and enforces explicit grants.
+
+{
+  "tagOwners": {
+    "tag:vps":     ["autogroup:admin"],
+    "tag:laptop":  ["autogroup:admin"],
+    "tag:homelab": ["autogroup:admin"]
+  },
+
+  "acls": [
+    // Admin laptop can SSH to any tagged VPS or homelab node
+    {
+      "action": "accept",
+      "src":    ["tag:laptop"],
+      "dst":    ["tag:vps:22", "tag:vps:80", "tag:vps:443", "tag:homelab:*"]
+    },
+    // VPS nodes can NOT initiate connections to laptop or homelab
+    // (default deny — no rule means denied)
+    // VPS nodes CAN talk to each other if needed (e.g., DB on one, app on another)
+    {
+      "action": "accept",
+      "src":    ["tag:vps"],
+      "dst":    ["tag:vps:*"]
+    }
+  ],
+
+  // SSH policy — Tailscale SSH uses this instead of OpenSSH authorized_keys
+  // when --ssh flag is set on tailscale up
+  "ssh": [
+    {
+      "action": "accept",
+      "src":    ["autogroup:admin"],
+      "dst":    ["tag:vps"],
+      "users":  ["sasha", "root"]
+    }
+  ],
+
+  // Tag-based filtering — VPS can't pretend to be a laptop
+  "autoApprovers": {
+    "routes": {},
+    "exitNode": []
+  }
+}

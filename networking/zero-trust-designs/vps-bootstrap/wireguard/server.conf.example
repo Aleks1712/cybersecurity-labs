@@ -1,0 +1,57 @@
+# ============================================================================
+# /etc/wireguard/wg0.conf — Server side
+# ============================================================================
+#
+# Generate keys first:
+#   wg genkey | tee server_private.key | wg pubkey > server_public.key
+#   chmod 600 server_private.key
+#
+# Replace placeholders below with actual keys and addresses.
+# ============================================================================
+
+[Interface]
+# Private key for the server — keep secret, mode 600
+PrivateKey = <SERVER_PRIVATE_KEY>
+
+# Server's IP within the WireGuard network (use a unique RFC1918 range, not
+# something that conflicts with real networks you'll route into the mesh)
+Address = 10.50.0.1/24
+
+# UDP port to listen on (default 51820)
+ListenPort = 51820
+
+# Save peer state on interface down (useful for ephemeral peers)
+SaveConfig = false
+
+# PostUp/PostDown hooks — only needed if this host should also act as a NAT
+# gateway for peers (uncomment if you want peers to use this VPS as their
+# internet exit). For pure mesh, leave commented.
+# PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+# PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+
+# ============================================================================
+# Peer entries — one block per client device
+# ============================================================================
+
+[Peer]
+# Description: laptop
+PublicKey  = <LAPTOP_PUBLIC_KEY>
+# What IPs this peer is allowed to claim. For pure mesh client, just /32.
+AllowedIPs = 10.50.0.10/32
+# PersistentKeepalive helps NAT'd clients stay reachable
+# PersistentKeepalive = 25
+
+
+[Peer]
+# Description: phone
+PublicKey  = <PHONE_PUBLIC_KEY>
+AllowedIPs = 10.50.0.11/32
+
+
+# [Peer]
+# Description: another VPS in the mesh
+# PublicKey  = <OTHER_VPS_PUBLIC_KEY>
+# AllowedIPs = 10.50.0.20/32
+# Endpoint   = other-vps.example.com:51820
+# PersistentKeepalive = 25

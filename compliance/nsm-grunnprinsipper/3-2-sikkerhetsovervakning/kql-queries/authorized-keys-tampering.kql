@@ -1,0 +1,32 @@
+// ============================================================================
+// Authorized Keys Tampering — Microsoft Sentinel KQL
+// ============================================================================
+// Maps to Sigma: authorized-keys-tampering.yml
+// Maps to MITRE: T1098.004 (SSH Authorized Keys), T1021.004 (SSH Lateral)
+// Maps to NSM: 2.6 Identitet og tilgang, 3.2 Sikkerhetsovervåkning
+//
+// Assumptions:
+//   - auditd watches /home/*/.ssh/authorized_keys and /root/.ssh/authorized_keys
+//   - audit key set to 'authkeys_change' in audit rules
+//   - syslog forwarding of audit events enabled
+// ============================================================================
+
+Syslog
+| where SyslogMessage contains "key=\"authkeys_change\""
+        or SyslogMessage contains "name=\".*authorized_keys.*\""
+| extend AuditUser = extract(@"auid=(\d+)", 1, SyslogMessage)
+| extend ProcessName = extract(@"comm=""([^""]+)""", 1, SyslogMessage)
+| extend FilePath = extract(@"name=""([^""]+)""", 1, SyslogMessage)
+| extend TargetHomeUser = extract(@"/home/(\w+)/\.ssh/", 1, FilePath)
+// Exclude known legitimate tools
+| where ProcessName !in (
+    "ssh-copy-id",         // first-time setup
+    "sshd"                 // sshd reads but doesn't typically write
+)
+| extend Severity = case(
+    FilePath contains "/root/.ssh/", "Critical",     // root keys = full host
+    isnotempty(TargetHomeUser), "High",
+    "Medium"
+)
+| project TimeGenerated, Computer, AuditUser, ProcessName, FilePath, TargetHomeUser, Severity, SyslogMessage
+| order by TimeGenerated desc

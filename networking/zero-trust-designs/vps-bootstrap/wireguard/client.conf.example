@@ -1,0 +1,36 @@
+# ============================================================================
+# WireGuard client — laptop / phone / other peer
+# ============================================================================
+#
+# Generate keys on the client:
+#   wg genkey | tee client_private.key | wg pubkey > client_public.key
+#
+# Add the client_public.key to the SERVER's wg0.conf as a [Peer] entry.
+# ============================================================================
+
+[Interface]
+PrivateKey = <CLIENT_PRIVATE_KEY>
+Address    = 10.50.0.10/32
+
+# DNS to use over the tunnel — pick one, or leave commented to use system DNS
+# DNS = 10.50.0.1, 1.1.1.1
+
+
+[Peer]
+# Description: VPS (server side)
+PublicKey  = <SERVER_PUBLIC_KEY>
+
+# What IPs to route through this peer.
+#
+# For pure mesh access (only reach VPS subnet via tunnel):
+AllowedIPs = 10.50.0.0/24
+#
+# For full-tunnel (route all internet traffic through VPS — VPN-style):
+# AllowedIPs = 0.0.0.0/0, ::/0
+#
+# Don't use both — pick one.
+
+Endpoint = <VPS_PUBLIC_IP>:51820
+
+# Keep NAT mappings alive — needed when client is behind NAT
+PersistentKeepalive = 25
